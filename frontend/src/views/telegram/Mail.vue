@@ -60,7 +60,7 @@ onMounted(async () => {
             <n-tag v-if="showEMailTo" type="info">
                 TO: {{ curMail.address }}
             </n-tag>
-            <iframe :srcdoc="sanitizeMailHtml(curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" style="margin-top: 10px;width: 100%; height: 100%;">
+            <iframe :srcdoc="sanitizeMailHtml(curMail.iframeMessage || curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" style="margin-top: 10px;width: 100%; height: 100%;">
             </iframe>
         </n-card>
     </div>
