@@ -1,5 +1,5 @@
 import PostalMime from 'postal-mime';
-import { mailTextHtml } from './mail-html.mjs';
+import { mailTextHtml, mailIframeHtml } from './mail-html.mjs';
 
 function humanFileSize(size) {
     const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
@@ -38,6 +38,7 @@ export async function processItem(item) {
         console.error(error);
     }
     if (item.subject && item.subject.length > 0 && item.message && item.message.length > 0) {
+        item.iframeMessage = await mailIframeHtml(item.message, item.attachments);
         return item;
     }
     // Fallback to PostalMime
@@ -73,6 +74,7 @@ export async function processItem(item) {
         item.subject = 'No Subject';
         item.message = mailTextHtml(item.raw);
     }
+    item.iframeMessage = await mailIframeHtml(item.message, item.attachments);
     return item;
 }
 
