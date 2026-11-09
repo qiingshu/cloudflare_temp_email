@@ -1,0 +1,10 @@
+{
+  "operation": "POST /pages/assets/check-missing",
+  "input": "empty hashes; no assets uploaded",
+  "status": 403,
+  "code": 8000013,
+  "message": "Authorization failed",
+  "ray": "a57bb5d4fa91b25f-LAX",
+  "upload_jwt": "issued inside connector; not exported or logged",
+  "production_changed": false
+}

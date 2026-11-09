@@ -1,5 +1,6 @@
 import { Context, Hono } from 'hono'
 import { Jwt } from 'hono/utils/jwt'
+import { mailSecurityAddressIdentity } from '../mail-security'
 import { createMimeMessage } from 'mimetext';
 import { Resend } from 'resend';
 import { WorkerMailer, WorkerMailerOptions } from 'worker-mailer';
@@ -255,7 +256,9 @@ api.post('/api/send_mail', async (c) => {
 api.post('/external/api/send_mail', async (c) => {
     const { token } = await c.req.json();
     try {
-        const { address } = await Jwt.verify(token, c.env.JWT_SECRET, "HS256");
+        const payload = await Jwt.verify(token, c.env.JWT_SECRET, "HS256");
+        if (!await mailSecurityAddressIdentity(c.env, payload)) return c.text("Invalid address credential", 401);
+        const { address } = payload;
         if (!address) {
             return c.text("No address", 400)
         }

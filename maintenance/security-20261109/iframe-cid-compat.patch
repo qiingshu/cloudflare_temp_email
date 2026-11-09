@@ -1,0 +1,78 @@
+--- assets/index-auth-20261109.js
++++ assets/index-auth-20261109.js
+@@ -1,4 +1,4 @@
+-import {sanitizeMailHtml, mailTextHtml} from './mail-html.mjs';
++import {sanitizeMailHtml, mailTextHtml, mailIframeHtml} from './mail-html.mjs';
+ import { authSecurity } from "./email-auth-20261109.mjs";
+ let EmailChallenge;
+ const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/SendMail-TU-TLMj_-mailnav20261030.js","assets/index.esm-x8fQMJsI-mailnav20261030.js","assets/index-BHtaHxM4.css","assets/SendMail-RDnFq-uT.css","assets/Admin-auth-20261109.js","assets/Admin-C_JBn6KL.css","assets/Mail-gWf0Bcc3-mailnav20261030.js","assets/Mail-ZAkRaohU.css"])))=>i.map(i=>d[i]);
+@@ -52790,7 +52790,7 @@
+     } catch (t) {
+       console.log("Error parsing email with mail-parser-wasm"), console.error(t);
+     }
+-    if (e.subject && e.subject.length > 0 && e.message && e.message.length > 0) return e;
++    if (e.subject && e.subject.length > 0 && e.message && e.message.length > 0) { e.iframeMessage = await mailIframeHtml(e.message, e.attachments); return e; }
+     try {
+       const t = await Dc.parse(e.raw);
+       e.source = t.from.address || e.source, t.from.address && t.from.name && (e.source = `${t.from.name} <${t.from.address}>`), e.subject = t.subject || "No Subject", e.message = t.html || mailTextHtml(t.text || e.raw), e.text = t.text || "", e.attachments = ((_b2 = t.attachments) == null ? void 0 : _b2.map((r) => {
+@@ -52811,6 +52811,7 @@
+     } catch (t) {
+       console.log("Error parsing email with PostalMime"), console.error(t), e.subject = "No Subject", e.message = mailTextHtml(e.raw);
+     }
++    e.iframeMessage = await mailIframeHtml(e.message, e.attachments);
+     return e;
+   };
+   function c0(e) {
+@@ -53428,7 +53429,7 @@
+                           key: 1,
+                           sandbox: "allow-popups allow-popups-to-escape-sandbox",
+                           referrerpolicy: "no-referrer",
+-                          srcdoc: sanitizeMailHtml(S.value.message),
++                          srcdoc: sanitizeMailHtml(S.value.iframeMessage || S.value.message),
+                           style: {
+                             "margin-top": "10px",
+                             width: "100%",
+@@ -53857,7 +53858,7 @@
+                       key: 1,
+                       sandbox: "allow-popups allow-popups-to-escape-sandbox",
+                           referrerpolicy: "no-referrer",
+-                          srcdoc: sanitizeMailHtml(S.value.message),
++                          srcdoc: sanitizeMailHtml(S.value.iframeMessage || S.value.message),
+                       style: {
+                         "margin-top": "10px",
+                         width: "100%",
+--- assets/Mail-gWf0Bcc3-mailnav20261030.js
++++ assets/Mail-gWf0Bcc3-mailnav20261030.js
+@@ -19,7 +19,7 @@
+     e.value = await u();
+   }), (t, E) => {
+     const o = N, h = k;
+-    return i(), M("div", S, [a(e).message ? (i(), d(h, { key: 0, bordered: false, embedded: "", style: { "max-width": "800px", height: "100%" } }, { default: s(() => [l(o, { type: "info" }, { default: s(() => [n(" ID: " + c(a(e).id), 1)]), _: 1 }), l(o, { type: "info" }, { default: s(() => [n(" Date: " + c(a(O)(a(e).created_at, a(f))), 1)]), _: 1 }), l(o, { type: "info" }, { default: s(() => [n(" FROM: " + c(a(e).source), 1)]), _: 1 }), t.showEMailTo ? (i(), d(o, { key: 0, type: "info" }, { default: s(() => [n(" TO: " + c(a(e).address), 1)]), _: 1 })) : p("", true), B("iframe", { sandbox: "allow-popups allow-popups-to-escape-sandbox", referrerpolicy: "no-referrer", srcdoc: sanitizeMailHtml(a(e).message), style: { "margin-top": "10px", width: "100%", height: "100%" } }, null, 8, V)]), _: 1 })) : p("", true)]);
++    return i(), M("div", S, [a(e).message ? (i(), d(h, { key: 0, bordered: false, embedded: "", style: { "max-width": "800px", height: "100%" } }, { default: s(() => [l(o, { type: "info" }, { default: s(() => [n(" ID: " + c(a(e).id), 1)]), _: 1 }), l(o, { type: "info" }, { default: s(() => [n(" Date: " + c(a(O)(a(e).created_at, a(f))), 1)]), _: 1 }), l(o, { type: "info" }, { default: s(() => [n(" FROM: " + c(a(e).source), 1)]), _: 1 }), t.showEMailTo ? (i(), d(o, { key: 0, type: "info" }, { default: s(() => [n(" TO: " + c(a(e).address), 1)]), _: 1 })) : p("", true), B("iframe", { sandbox: "allow-popups allow-popups-to-escape-sandbox", referrerpolicy: "no-referrer", srcdoc: sanitizeMailHtml(a(e).iframeMessage || a(e).message), style: { "margin-top": "10px", width: "100%", height: "100%" } }, null, 8, V)]), _: 1 })) : p("", true)]);
+   };
+ } }, F = y(C, [["__scopeId", "data-v-5ff036bb"]]);
+ export {
+--- assets/mail-html.mjs
++++ assets/mail-html.mjs
+@@ -16,3 +16,21 @@
+   node.textContent = String(value ?? '');
+   return node.outerHTML;
+ }
++
++// Sandboxed srcdoc has an opaque origin and cannot load parent-origin blob URLs.
++// Resolve only images belonging to this parsed message, never arbitrary URLs.
++export async function mailIframeHtml(value, attachments = []) {
++  const doc = new DOMParser().parseFromString(sanitizeMailHtml(value), 'text/html');
++  await Promise.all(Array.from(doc.querySelectorAll('img[src]'), async image => {
++    const attachment = attachments.find(item => item.url === image.getAttribute('src'));
++    if (!attachment?.blob || !attachment.blob.type.startsWith('image/')) return;
++    const data = await new Promise((resolve, reject) => {
++      const reader = new FileReader();
++      reader.onload = () => resolve(reader.result);
++      reader.onerror = () => reject(reader.error);
++      reader.readAsDataURL(attachment.blob);
++    });
++    image.setAttribute('src', data);
++  }));
++  return sanitizeMailHtml(doc.body.innerHTML);
++}

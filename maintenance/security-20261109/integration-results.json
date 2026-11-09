@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "runtime": "Node with self shim; cloudflare:sockets replaced with throwing stub only in test copy",
+  "checks": [
+    "health unchanged",
+    "current address credential 200",
+    "old address id 401",
+    "missing address id 401",
+    "external old credential 401",
+    "missing or forged Telegram secret 401 before any external call",
+    "admin remains protected"
+  ],
+  "productionWrites": 0
+}

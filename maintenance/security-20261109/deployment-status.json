@@ -1,0 +1,26 @@
+{
+  "status": "production-deployed-accepted-with-explicit-validation-limits",
+  "worker_version": "e924fd72-82b4-42c3-a7e8-95b181b501ee",
+  "worker_deployment": "de5b624a-1b0d-4a04-af2e-128529a7cf1e",
+  "worker_percent": 100,
+  "pages_deployment": "068ae174-2892-4591-80d2-241d20bf9a01",
+  "preview": "https://8d97202c.email-6c2.pages.dev",
+  "rollback": "pr2/release-plan.json",
+  "production_writes": "Authorized Telegram webhook/commands initialization; one designated inbound test email id219. No account, role, password, schema or existing mail changed/deleted.",
+  "browser_mail_fixture_cases": 28,
+  "layout_fixture_cases": 24,
+  "isolated_auth_groups": 7,
+  "real_public_preview_cases": 6,
+  "real_public_production_cases": 6,
+  "production_assets_verified": 55,
+  "production_negative_api_checks": 7,
+  "user_telegram_and_mail": "Confirmed successful init, /start reply, official webhook/no new error, existing mailbox read, new plaintext rendering normal",
+  "outbound": "User explicitly chose 保留未验证，直接收尾. Existing enabled=0/balance=0, no quota or role writes; no new outbound delivery claimed.",
+  "limits": [
+    "No production destructive deletion test; PR SQLite evidence and isolated candidate checks retained",
+    "Old/superseded address-ID rejection verified in isolated candidate, not production replay",
+    "Fresh OAuth authorization not repeated; entry compatibility isolated and prior real acceptance retained"
+  ],
+  "utc": "2026-11-09T09:42:25.418529+00:00",
+  "closed_utc": "2026-11-09T09:46:04.013451+00:00"
+}

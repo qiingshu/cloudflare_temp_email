@@ -1,4 +1,5 @@
 <script setup>
+import { sanitizeMailHtml } from '../utils/mail-html.mjs';
 import { watch, onMounted, ref, onBeforeUnmount } from "vue";
 import { useMessage } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
@@ -462,7 +463,7 @@ onBeforeUnmount(() => {
               </n-button>
             </n-space>
             <pre v-if="showTextMail" style="margin-top: 10px;">{{ curMail.text }}</pre>
-            <iframe v-else-if="useIframeShowMail" :srcdoc="curMail.message"
+            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.iframeMessage || curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
               style="margin-top: 10px;width: 100%; height: 100%;">
             </iframe>
             <ShadowHtmlComponent v-else :htmlContent="curMail.message" style="margin-top: 10px;" />
@@ -562,7 +563,7 @@ onBeforeUnmount(() => {
               </n-button>
             </n-space>
             <pre v-if="showTextMail" style="margin-top: 10px;">{{ curMail.text }}</pre>
-            <iframe v-else-if="useIframeShowMail" :srcdoc="curMail.message"
+            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.iframeMessage || curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
               style="margin-top: 10px;width: 100%; height: 100%;">
             </iframe>
             <ShadowHtmlComponent :key="curMail.id" v-else :htmlContent="curMail.message" style="margin-top: 10px;" />

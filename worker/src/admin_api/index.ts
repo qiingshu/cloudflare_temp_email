@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { mailSecurityDeleteAddress } from '../mail-security'
 import { Jwt } from 'hono/utils/jwt'
 
 import i18n from '../i18n'
@@ -63,29 +64,8 @@ api.post('/admin/new_address', async (c) => {
 
 api.delete('/admin/delete_address/:id', async (c) => {
     const { id } = c.req.param();
-    const { success } = await c.env.DB.prepare(
-        `DELETE FROM address WHERE id = ? `
-    ).bind(id).run();
-    if (!success) {
-        return c.text("Failed to delete address", 500)
-    }
-    const { success: mailSuccess } = await c.env.DB.prepare(
-        `DELETE FROM raw_mails WHERE address IN`
-        + ` (select name from address where id = ?) `
-    ).bind(id).run();
-    if (!mailSuccess) {
-        return c.text("Failed to delete mails", 500)
-    }
-    const { success: sendAccess } = await c.env.DB.prepare(
-        `DELETE FROM address_sender WHERE address IN`
-        + ` (select name from address where id = ?) `
-    ).bind(id).run();
-    const { success: usersAddressSuccess } = await c.env.DB.prepare(
-        `DELETE FROM users_address WHERE address_id = ?`
-    ).bind(id).run();
-    return c.json({
-        success: success && mailSuccess && sendAccess && usersAddressSuccess
-    })
+    const success = await mailSecurityDeleteAddress(c.env, id);
+    return success ? c.json({success:true}) : c.text('Failed to delete address',500);
 })
 
 api.get('/admin/show_password/:id', async (c) => {
