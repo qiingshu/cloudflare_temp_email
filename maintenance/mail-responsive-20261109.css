@@ -1,0 +1,55 @@
+/* Screen-size adaptation only; preserve existing flow, order and breakpoints. */
+#app,
+#app .n-layout,
+#app .n-layout-header,
+#app .n-layout-content,
+#app .n-page-header,
+#app .n-page-header-main {
+  min-width: 0;
+}
+#app .center > .n-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.n-modal {
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+}
+#app .n-card img,
+#app .n-card video {
+  max-width: 100%;
+  height: auto;
+}
+#app .n-data-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Turnstile has a 300px minimum; fit its existing content without clipping. */
+.email-challenge { container-type: inline-size; }
+.email-challenge > div:first-child { zoom: min(1, calc(100cqi / 300px)); }
+
+/* Keep the existing wide table intact inside its own horizontal scroller. */
+
+/* Bound the existing responsive menu; retain its built-in overflow behavior. */
+#app .n-page-header__main,
+#app .n-page-header__content,
+#app .n-page-header__extra,
+#app .n-page-header__extra .n-space,
+#app .n-page-header__extra .n-space > div,
+#app .n-page-header__extra .n-menu,
+#app .n-page-header__extra .v-overflow { min-width: 0; max-width: 100%; }
+#app .n-page-header__extra { flex-shrink: 1; }
+
+/* Preserve each original table minimum on the inner content, not its frame. */
+:is(#app, .n-modal) .n-data-table[data-v-2af033d1] { min-width: 0; max-width: 100%; overflow-x: auto; }
+:is(#app, .n-modal) .n-data-table[data-v-2af033d1] > .n-data-table-wrapper { min-width: 700px; }
+:is(#app, .n-modal) .n-data-table[data-v-bd8929db] { min-width: 0; max-width: 100%; overflow-x: auto; }
+:is(#app, .n-modal) .n-data-table[data-v-bd8929db] > .n-data-table-wrapper { min-width: 700px; }
+:is(#app, .n-modal) .n-data-table[data-v-621e5790] { min-width: 0; max-width: 100%; overflow-x: auto; }
+:is(#app, .n-modal) .n-data-table[data-v-621e5790] > .n-data-table-wrapper { min-width: 1000px; }
+:is(#app, .n-modal) .n-data-table[data-v-b33d0779] { min-width: 0; max-width: 100%; overflow-x: auto; }
+:is(#app, .n-modal) .n-data-table[data-v-b33d0779] > .n-data-table-wrapper { min-width: 700px; }
+:is(#app, .n-modal) .n-data-table[data-v-9bf893ed] { min-width: 0; max-width: 100%; overflow-x: auto; }
+:is(#app, .n-modal) .n-data-table[data-v-9bf893ed] > .n-data-table-wrapper { min-width: 800px; }
