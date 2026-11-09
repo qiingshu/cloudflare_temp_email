@@ -463,7 +463,7 @@ onBeforeUnmount(() => {
               </n-button>
             </n-space>
             <pre v-if="showTextMail" style="margin-top: 10px;">{{ curMail.text }}</pre>
-            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
+            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.iframeMessage || curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
               style="margin-top: 10px;width: 100%; height: 100%;">
             </iframe>
             <ShadowHtmlComponent v-else :htmlContent="curMail.message" style="margin-top: 10px;" />
@@ -563,7 +563,7 @@ onBeforeUnmount(() => {
               </n-button>
             </n-space>
             <pre v-if="showTextMail" style="margin-top: 10px;">{{ curMail.text }}</pre>
-            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
+            <iframe v-else-if="useIframeShowMail" :srcdoc="sanitizeMailHtml(curMail.iframeMessage || curMail.message)" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"
               style="margin-top: 10px;width: 100%; height: 100%;">
             </iframe>
             <ShadowHtmlComponent :key="curMail.id" v-else :htmlContent="curMail.message" style="margin-top: 10px;" />
