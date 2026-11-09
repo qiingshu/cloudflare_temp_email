@@ -1,4 +1,5 @@
 <script setup>
+import ShadowHtmlComponent from './ShadowHtmlComponent.vue';
 import { watch, onMounted, ref, computed } from "vue";
 import { useMessage } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
@@ -294,7 +295,7 @@ onMounted(async () => {
             </n-space>
             <pre v-if="showCode" style="margin-top: 10px;">{{ curMail.raw }}</pre>
             <pre v-else-if="!curMail.is_html" style="margin-top: 10px;">{{ curMail.content }}</pre>
-            <div v-else v-html="curMail.content" style="margin-top: 10px;"></div>
+            <ShadowHtmlComponent v-else :htmlContent="curMail.content" style="margin-top: 10px;" />
           </n-card>
           <n-card :bordered="false" embedded class="mail-item" v-else>
             <n-result status="info" :title="t('pleaseSelectMail')">
@@ -363,7 +364,7 @@ onMounted(async () => {
             </n-space>
             <pre v-if="showCode" style="margin-top: 10px;">{{ curMail.raw }}</pre>
             <pre v-else-if="!curMail.is_html" style="margin-top: 10px;">{{ curMail.content }}</pre>
-            <div v-else v-html="curMail.content" style="margin-top: 10px;"></div>
+            <ShadowHtmlComponent v-else :htmlContent="curMail.content" style="margin-top: 10px;" />
           </n-card>
         </n-drawer-content>
       </n-drawer>

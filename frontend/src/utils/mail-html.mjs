@@ -2,10 +2,10 @@ import DOMPurify from './dompurify-3.4.17.mjs';
 DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
   if (node.tagName === 'IMG' && data.attrName === 'src' && data.attrValue.startsWith('blob:' + window.location.origin + '/')) data.forceKeepAttr = true;
 });
-export function sanitizeMailHtml(value) {
+export function sanitizeMailHtml(value, { isolated = true } = {}) {
   return DOMPurify.sanitize(String(value ?? ''), {
     USE_PROFILES: {html: true},
-    FORBID_TAGS: ['script','iframe','object','embed','form','input','button','textarea','select','option','link','meta','base'],
+    FORBID_TAGS: ['script','iframe','object','embed','form','input','button','textarea','select','option','link','meta','base', ...(!isolated ? ['style'] : [])],
     FORBID_ATTR: ['srcdoc'],
     ALLOW_UNKNOWN_PROTOCOLS: false,
     SANITIZE_NAMED_PROPS: true

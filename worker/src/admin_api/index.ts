@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { mailSecurityDeleteAddress } from '../mail-security'
+import { pruneDeletedTelegramCredential } from '../telegram_api/common'
 import { Jwt } from 'hono/utils/jwt'
 
 import i18n from '../i18n'
@@ -64,7 +65,12 @@ api.post('/admin/new_address', async (c) => {
 
 api.delete('/admin/delete_address/:id', async (c) => {
     const { id } = c.req.param();
+    const name = await c.env.DB.withSession('first-primary').prepare('SELECT name FROM address WHERE id = ?').bind(id).first<string>('name');
     const success = await mailSecurityDeleteAddress(c.env, id);
+    if (success && name) {
+        try { await pruneDeletedTelegramCredential(c, name, id); }
+        catch { console.warn('Telegram deleted-address cleanup failed'); }
+    }
     return success ? c.json({success:true}) : c.text('Failed to delete address',500);
 })
 

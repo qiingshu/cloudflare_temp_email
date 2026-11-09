@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:security": "node --test test/*.test.mjs",
+    "build:security": "wrangler deploy src/worker.ts --name mail-isolation-check --dry-run --outdir dist --minify --compatibility-date 2025-04-01 --compatibility-flags nodejs_compat",
     "dev": "wrangler dev",
     "lint": "eslint src",
     "deploy": "wrangler deploy --minify",
@@ -15,6 +17,7 @@
     "@eslint/js": "9.18.0",
     "@simplewebauthn/types": "10.0.0",
     "@types/node": "^22.15.19",
+    "esbuild": "0.25.4",
     "eslint": "9.18.0",
     "globals": "^15.15.0",
     "typescript-eslint": "^8.32.1",

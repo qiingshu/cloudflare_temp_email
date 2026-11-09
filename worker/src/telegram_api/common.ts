@@ -68,8 +68,9 @@ export const jwtListToAddressData = async (
 export const bindTelegramAddress = async (
     c: Context<HonoCustomType>, userId: string, jwt: string
 ): Promise<string> => {
-    const { address } = await Jwt.verify(jwt, c.env.JWT_SECRET, "HS256");
-    if (!address) {
+    const payload = await Jwt.verify(jwt, c.env.JWT_SECRET, "HS256");
+    const { address } = payload;
+    if (!await mailSecurityAddressIdentity(c.env, payload)) {
         throw Error("无效凭证");
     }
     const jwtList = await c.env.KV.get<string[]>(`${CONSTANTS.TG_KV_PREFIX}:${userId}`, 'json') || [];
@@ -103,9 +104,46 @@ export const unbindTelegramAddress = async (
         newJwtList.push(jwt);
     }
     await c.env.KV.put(`${CONSTANTS.TG_KV_PREFIX}:${userId}`, JSON.stringify(newJwtList));
-    await c.env.KV.delete(`${CONSTANTS.TG_KV_PREFIX}:${address}`);
+    // KV has no compare-and-delete. Keep the routing hint to avoid deleting a
+    // concurrent new binding; delivery validates this user's current list.
     return true;
 }
+
+export const telegramOwnsCurrentAddress = async (
+    c: Context<HonoCustomType>, userId: string, address: string
+): Promise<boolean> => {
+    const list = await c.env.KV.get<string[]>(`${CONSTANTS.TG_KV_PREFIX}:${userId}`, 'json') || [];
+    for (const jwt of list) {
+        try {
+            const payload = await Jwt.verify(jwt, c.env.JWT_SECRET, "HS256");
+            if (payload.address === address && await mailSecurityAddressIdentity(c.env, payload)) return true;
+        } catch {
+            // Invalid credentials do not authorize delivery.
+        }
+    }
+    return false;
+}
+
+export const pruneDeletedTelegramCredential = async (
+    c: Context<HonoCustomType>, address: string, deletedId: string
+) => {
+    if (!c.env.KV) return;
+    const userId = await c.env.KV.get<string>(`${CONSTANTS.TG_KV_PREFIX}:${address}`);
+    if (!userId) return;
+    const key = `${CONSTANTS.TG_KV_PREFIX}:${userId}`;
+    const list = await c.env.KV.get<string[]>(key, 'json') || [];
+    const keep = [];
+    for (const jwt of list) {
+        try {
+            const payload = await Jwt.verify(jwt, c.env.JWT_SECRET, 'HS256');
+            if (payload.address === address && String(payload.address_id) === deletedId) continue;
+        } catch { /* Preserve unrelated entries; delivery rejects invalid tokens. */ }
+        keep.push(jwt);
+    }
+    if (keep.length !== list.length) await c.env.KV.put(key, JSON.stringify(keep));
+    // Never delete the address routing hint: KV has no atomic ownership lease.
+    // Stale hints are harmless after the authoritative D1 identity check.
+};
 
 export const unbindTelegramByAddress = async (
     c: Context<HonoCustomType>, address: string

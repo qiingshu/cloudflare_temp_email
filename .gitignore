@@ -1,5 +1,7 @@
 dist/
 test/
+!worker/test/
+!frontend/test/
 .vscode/
 # Logs
 logs
