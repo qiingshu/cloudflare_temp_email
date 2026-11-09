@@ -1,0 +1,27 @@
+/* Screen-size adaptation only; preserve existing flow, order and breakpoints. */
+#app,
+#app .n-layout,
+#app .n-layout-header,
+#app .n-layout-content,
+#app .n-page-header,
+#app .n-page-header-main {
+  min-width: 0;
+}
+#app .center > .n-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#app .n-modal {
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+}
+#app .n-card img,
+#app .n-card video {
+  max-width: 100%;
+  height: auto;
+}
+#app .n-data-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
