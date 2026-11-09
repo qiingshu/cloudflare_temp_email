@@ -1,0 +1,7 @@
+{
+  "worker_version": "3a73ce6e-bd26-4fab-af5a-4455904efe33",
+  "pages_deployment": "d1fdedfc-5dad-4f5c-a821-860e40ec13dc",
+  "worker_sha256": "986d57beb9efa413f33d0501848b2bbee7a82facc3aae610a3de19b7d00353e9",
+  "frontend_sha256": "5941da55b03513f424c455c8f6e8c0ee233a1a456c8cf84be1dace6b2b88e9e6",
+  "candidate_worker_sha256": "040a5d0176bb9edc71adebe8d38aa5350cb661afcb50760fedaf0b0101d158a6"
+}

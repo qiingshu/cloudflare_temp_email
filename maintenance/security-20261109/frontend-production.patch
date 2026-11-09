@@ -1,0 +1,74 @@
+--- assets/index-auth-20261109.js
++++ assets/index-auth-20261109.js
+@@ -1,3 +1,4 @@
++import {sanitizeMailHtml, mailTextHtml} from './mail-html.mjs';
+ import { authSecurity } from "./email-auth-20261109.mjs";
+ let EmailChallenge;
+ const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/SendMail-TU-TLMj_-mailnav20261030.js","assets/index.esm-x8fQMJsI-mailnav20261030.js","assets/index-BHtaHxM4.css","assets/SendMail-RDnFq-uT.css","assets/Admin-auth-20261109.js","assets/Admin-C_JBn6KL.css","assets/Mail-gWf0Bcc3-mailnav20261030.js","assets/Mail-ZAkRaohU.css"])))=>i.map(i=>d[i]);
+@@ -52771,7 +52772,7 @@
+           parse_message: n
+         };
+       }, []), r = t(e.raw);
+-      e.source = r.sender || e.source, e.subject = r.subject || "", e.message = r.body_html || r.text || "", e.text = r.text || "", e.attachments = ((_a2 = r.attachments) == null ? void 0 : _a2.map((n) => {
++      e.source = r.sender || e.source, e.subject = r.subject || "", e.message = r.body_html || mailTextHtml(r.text || ""), e.text = r.text || "", e.attachments = ((_a2 = r.attachments) == null ? void 0 : _a2.map((n) => {
+         var _a3;
+         const o = new Blob([
+           n.content
+@@ -52792,7 +52793,7 @@
+     if (e.subject && e.subject.length > 0 && e.message && e.message.length > 0) return e;
+     try {
+       const t = await Dc.parse(e.raw);
+-      e.source = t.from.address || e.source, t.from.address && t.from.name && (e.source = `${t.from.name} <${t.from.address}>`), e.subject = t.subject || "No Subject", e.message = t.html || t.text || e.raw, e.text = t.text || "", e.attachments = ((_b2 = t.attachments) == null ? void 0 : _b2.map((r) => {
++      e.source = t.from.address || e.source, t.from.address && t.from.name && (e.source = `${t.from.name} <${t.from.address}>`), e.subject = t.subject || "No Subject", e.message = t.html || mailTextHtml(t.text || e.raw), e.text = t.text || "", e.attachments = ((_b2 = t.attachments) == null ? void 0 : _b2.map((r) => {
+         var _a3;
+         const n = new Blob([
+           r.content
+@@ -52808,7 +52809,7 @@
+         };
+       })) || [];
+     } catch (t) {
+-      console.log("Error parsing email with PostalMime"), console.error(t), e.subject = "No Subject", e.message = e.raw;
++      console.log("Error parsing email with PostalMime"), console.error(t), e.subject = "No Subject", e.message = mailTextHtml(e.raw);
+     }
+     return e;
+   };
+@@ -52845,7 +52846,7 @@
+             console.warn("Shadow DOM not supported, falling back to v-html:", a), o.value = true;
+             return;
+           }
+-          n && (n.innerHTML = t.htmlContent);
++          n && (n.innerHTML = sanitizeMailHtml(t.htmlContent));
+         } catch (a) {
+           console.error("Failed to render Shadow DOM, falling back to v-html:", a), o.value = true;
+         }
+@@ -52864,7 +52865,7 @@
+         flush: "post"
+       }), (a, l) => o.value ? (we(), Ge("div", {
+         key: 0,
+-        innerHTML: e.htmlContent
++        innerHTML: sanitizeMailHtml(e.htmlContent)
+       }, null, 8, RW)) : (we(), Ge("div", {
+         key: 1,
+         ref_key: "shadowHost",
+@@ -53425,7 +53426,9 @@
+                         }),
+                         w.value ? (we(), Ge("pre", FW, Ce(S.value.text), 1)) : U(d) ? (we(), Ge("iframe", {
+                           key: 1,
+-                          srcdoc: S.value.message,
++                          sandbox: "allow-popups allow-popups-to-escape-sandbox",
++                          referrerpolicy: "no-referrer",
++                          srcdoc: sanitizeMailHtml(S.value.message),
+                           style: {
+                             "margin-top": "10px",
+                             width: "100%",
+@@ -53852,7 +53855,9 @@
+                     }),
+                     w.value ? (we(), Ge("pre", TW, Ce(S.value.text), 1)) : U(d) ? (we(), Ge("iframe", {
+                       key: 1,
+-                      srcdoc: S.value.message,
++                      sandbox: "allow-popups allow-popups-to-escape-sandbox",
++                          referrerpolicy: "no-referrer",
++                          srcdoc: sanitizeMailHtml(S.value.message),
+                       style: {
+                         "margin-top": "10px",
+                         width: "100%",

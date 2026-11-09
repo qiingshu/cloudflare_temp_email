@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import { Jwt } from "hono/utils/jwt";
+import { mailSecurityAddressIdentity } from "../mail-security";
 import { CONSTANTS } from "../constants";
 import { getIntValue, getJsonSetting } from "../utils";
 import { deleteAddressWithData, newAddress } from "../common";
@@ -50,7 +51,9 @@ export const jwtListToAddressData = async (
     const invalidJwtList = [] as string[];
     for (const jwt of jwtList) {
         try {
-            const { address, address_id } = await Jwt.verify(jwt, c.env.JWT_SECRET, "HS256");
+            const payload = await Jwt.verify(jwt, c.env.JWT_SECRET, "HS256");
+            if (!await mailSecurityAddressIdentity(c.env, payload)) throw new Error("Invalid address credential");
+            const { address, address_id } = payload;
             addressList.push(address as string);
             addressIdMap[address as string] = address_id as number;
         } catch (e) {

@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { mailSecurityWebhookSecret, mailSecurityVerifyWebhook } from '../mail-security'
 import { ServerResponse } from 'node:http'
 import { Writable } from 'node:stream'
 
@@ -30,6 +31,7 @@ api.use("/admin/telegram/*", async (c, next) => {
 });
 
 api.post("/telegram/webhook", async (c) => {
+    if (!await mailSecurityVerifyWebhook(c.req.header("x-telegram-bot-api-secret-token") || null, c.env)) return c.text("Unauthorized", 401);
     const token = c.env.TELEGRAM_BOT_TOKEN;
     const bot = newTelegramBot(c, token);
     let body = null;
@@ -50,7 +52,7 @@ api.post("/admin/telegram/init", async (c) => {
     const webhookUrl = `https://${domain}/telegram/webhook`;
     console.log(`setting webhook to ${webhookUrl}`);
     const bot = newTelegramBot(c, token);
-    await bot.telegram.setWebhook(webhookUrl)
+    await bot.telegram.setWebhook(webhookUrl, { secret_token: await mailSecurityWebhookSecret(c.env) })
     await initTelegramBotCommands(bot);
     return c.json({
         message: "webhook set successfully",

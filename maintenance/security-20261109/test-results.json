@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "isolated Node WebCrypto, jsdom and SQLite; no production accounts or mail used",
+  "maliciousPayloadCount": 6,
+  "renderModes": [
+    "shadow",
+    "fallback"
+  ],
+  "iframe": "static sandbox check only; real browser test blocked by process socket restriction",
+  "webhook": "helper validation only; real Telegram not tested",
+  "address": "mock database plus SQLite rollback and recreation tests"
+}

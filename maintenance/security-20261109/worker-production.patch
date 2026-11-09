@@ -1,0 +1,99 @@
+--- index.js
++++ index.js
+@@ -1,3 +1,29 @@
++async function mailSecurityWebhookSecret(env) {
++  if (!env.JWT_SECRET || !env.TELEGRAM_BOT_TOKEN) throw new Error('Webhook configuration unavailable');
++  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.JWT_SECRET), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
++  const signed = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('email.telegram.webhook.v1:'+env.TELEGRAM_BOT_TOKEN));
++  return Array.from(new Uint8Array(signed), b=>b.toString(16).padStart(2,'0')).join('');
++}
++async function mailSecurityVerifyWebhook(provided, env) {
++  if (typeof provided !== 'string' || !/^[a-f0-9]{64}$/.test(provided)) return false;
++  if (!env.JWT_SECRET || !env.TELEGRAM_BOT_TOKEN) return false;
++  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(env.JWT_SECRET), {name:'HMAC',hash:'SHA-256'}, false, ['verify']);
++  return crypto.subtle.verify('HMAC', key, Uint8Array.from(provided.match(/../g), x=>parseInt(x,16)), new TextEncoder().encode('email.telegram.webhook.v1:'+env.TELEGRAM_BOT_TOKEN));
++}
++async function mailSecurityAddressIdentity(env, payload) {
++  if (!payload || typeof payload.address !== 'string' || !payload.address || !/^[1-9][0-9]*$/.test(String(payload.address_id ?? ''))) return false;
++  const db = env.DB.withSession('first-primary');
++  return !!await db.prepare('SELECT id FROM address WHERE id = ? AND name = ?').bind(payload.address_id, payload.address).first('id');
++}
++async function mailSecurityDeleteAddress(env, id) {
++  const db = env.DB.withSession('first-primary');
++  const statements = ['raw_mails','address_sender','sendbox','auto_reply_mails'].map(table => db.prepare(`DELETE FROM ${table} WHERE address IN (SELECT name FROM address WHERE id = ?)`).bind(id));
++  statements.push(db.prepare('DELETE FROM users_address WHERE address_id = ?').bind(id));
++  statements.push(db.prepare('DELETE FROM address WHERE id = ?').bind(id));
++  const results = await db.batch(statements);
++  return results.every(result=>result.success);
++}
++
+ var __defProp = Object.defineProperty;
+ var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+ 
+@@ -35455,7 +35481,9 @@
+ var Yc = s(async (e34, t) => {
+   let r = [], n = {}, i = [];
+   for (let o of t) try {
+-    let { address: a, address_id: u } = await Ct.verify(o, e34.env.JWT_SECRET, "HS256");
++    let payload = await Ct.verify(o, e34.env.JWT_SECRET, "HS256");
++    if (!await mailSecurityAddressIdentity(e34.env, payload)) throw new Error("Invalid address credential");
++    let { address: a, address_id: u } = payload;
+     r.push(a), n[a] = u;
+   } catch (a) {
+     r.push("\u65E0\u6548\u51ED\u8BC1"), i.push(o), console.log(`\u83B7\u53D6\u5730\u5740\u5217\u8868\u5931\u8D25: ${a.message}`);
+@@ -36726,7 +36754,9 @@
+ Mp.post("/external/api/send_mail", async (e34) => {
+   let { token: t } = await e34.req.json();
+   try {
+-    let { address: r } = await Ct.verify(t, e34.env.JWT_SECRET, "HS256");
++    let payload = await Ct.verify(t, e34.env.JWT_SECRET, "HS256");
++    if (!await mailSecurityAddressIdentity(e34.env, payload)) return e34.text("Invalid address credential", 401);
++    let { address: r } = payload;
+     if (!r) return e34.text("No address", 400);
+     let n = await e34.req.json();
+     return await Cg(e34, r, n), e34.json({ status: "ok" });
+@@ -43476,12 +43506,9 @@
+   }
+ });
+ wt.delete("/admin/delete_address/:id", async (e34) => {
+-  let { id: t } = e34.req.param(), { success: r } = await e34.env.DB.prepare("DELETE FROM address WHERE id = ? ").bind(t).run();
+-  if (!r) return e34.text("Failed to delete address", 500);
+-  let { success: n } = await e34.env.DB.prepare("DELETE FROM raw_mails WHERE address IN (select name from address where id = ?) ").bind(t).run();
+-  if (!n) return e34.text("Failed to delete mails", 500);
+-  let { success: i } = await e34.env.DB.prepare("DELETE FROM address_sender WHERE address IN (select name from address where id = ?) ").bind(t).run(), { success: o } = await e34.env.DB.prepare("DELETE FROM users_address WHERE address_id = ?").bind(t).run();
+-  return e34.json({ success: r && n && i && o });
++  const {id} = e34.req.param();
++  const success = await mailSecurityDeleteAddress(e34.env, id);
++  return success ? e34.json({success:true}) : e34.text('Failed to delete address',500);
+ });
+ wt.get("/admin/show_password/:id", async (e34) => {
+   let { id: t } = e34.req.param(), r = await e34.env.DB.prepare("SELECT name FROM address WHERE id = ? ").bind(t).first("name"), n = await Ct.sign({ address: r, address_id: t }, e34.env.JWT_SECRET, "HS256");
+@@ -43865,6 +43892,7 @@
+ co.use("/telegram/*", async (e34, t) => e34.env.TELEGRAM_BOT_TOKEN ? e34.env.KV ? await t() : e34.text("KV is required", 400) : e34.text("TELEGRAM_BOT_TOKEN is required", 400));
+ co.use("/admin/telegram/*", async (e34, t) => e34.env.TELEGRAM_BOT_TOKEN ? e34.env.KV ? await t() : e34.text("KV is required", 400) : e34.text("TELEGRAM_BOT_TOKEN is required", 400));
+ co.post("/telegram/webhook", async (e34) => {
++  if (!await mailSecurityVerifyWebhook(e34.req.raw.headers.get("x-telegram-bot-api-secret-token"), e34.env)) return e34.text("Unauthorized", 401);
+   let t = e34.env.TELEGRAM_BOT_TOKEN, r = uv(e34, t), n = null, i = new zCe();
+   Object.assign(i, { headersSent: false, setHeader: s((a, u) => e34.header(a, u), "setHeader"), end: s((a) => n = a, "end") });
+   let o = await e34.req.json();
+@@ -43874,7 +43902,7 @@
+   let t = new URL(e34.req.url).host, r = e34.env.TELEGRAM_BOT_TOKEN, n = `https://${t}/telegram/webhook`;
+   console.log(`setting webhook to ${n}`);
+   let i = uv(e34, r);
+-  return await i.telegram.setWebhook(n), await pQ(i), e34.json({ message: "webhook set successfully" });
++  return await i.telegram.setWebhook(n, { secret_token: await mailSecurityWebhookSecret(e34.env) }), await pQ(i), e34.json({ message: "webhook set successfully" });
+ });
+ co.get("/admin/telegram/status", async (e34) => {
+   let t = e34.env.TELEGRAM_BOT_TOKEN, r = uv(e34, t), n = await r.telegram.getWebhookInfo(), i = await r.telegram.getMyCommands();
+@@ -44079,7 +44107,10 @@
+   }
+   (e34.req.path.startsWith("/api/settings") || e34.req.path.startsWith("/api/send_mail")) && await XCe(e34);
+   try {
+-    return await U2({ secret: e34.env.JWT_SECRET, alg: "HS256" })(e34, t);
++    return await U2({ secret: e34.env.JWT_SECRET, alg: "HS256" })(e34, async () => {
++      if (!await mailSecurityAddressIdentity(e34.env, e34.get("jwtPayload"))) throw new Error("Invalid address credential");
++      return t();
++    });
+   } catch (n) {
+     console.warn(n);
+     let i = e34.get("lang") || e34.env.DEFAULT_LANG, o = kr.getMessages(i);

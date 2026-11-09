@@ -1,4 +1,5 @@
 import PostalMime from 'postal-mime';
+import { mailTextHtml } from './mail-html.mjs';
 
 function humanFileSize(size) {
     const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
@@ -13,7 +14,7 @@ export async function processItem(item) {
         const parsedEmail = parse_message(item.raw);
         item.source = parsedEmail.sender || item.source;
         item.subject = parsedEmail.subject || '';
-        item.message = parsedEmail.body_html || parsedEmail.text || '';
+        item.message = parsedEmail.body_html || mailTextHtml(parsedEmail.text || '');
         item.text = parsedEmail.text || '';
         item.attachments = parsedEmail.attachments?.map((a_item) => {
             const blob = new Blob(
@@ -47,7 +48,7 @@ export async function processItem(item) {
             item.source = `${parsedEmail.from.name} <${parsedEmail.from.address}>`;
         }
         item.subject = parsedEmail.subject || 'No Subject';
-        item.message = parsedEmail.html || parsedEmail.text || item.raw;
+        item.message = parsedEmail.html || mailTextHtml(parsedEmail.text || item.raw);
         item.text = parsedEmail.text || '';
         item.attachments = parsedEmail.attachments?.map((a_item) => {
             const blob = new Blob(
@@ -70,7 +71,7 @@ export async function processItem(item) {
         console.log('Error parsing email with PostalMime');
         console.error(error);
         item.subject = 'No Subject';
-        item.message = item.raw;
+        item.message = mailTextHtml(item.raw);
     }
     return item;
 }

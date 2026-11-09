@@ -1,10 +1,11 @@
 <template>
-    <div v-if="useFallback" v-html="htmlContent"></div>
+    <div v-if="useFallback" v-html="sanitizeMailHtml(htmlContent)"></div>
     <div v-else ref="shadowHost"></div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { sanitizeMailHtml } from '../utils/mail-html.mjs';
 
 const props = defineProps({
     htmlContent: {
@@ -40,7 +41,7 @@ const renderShadowDom = () => {
 
         // Update content if Shadow DOM exists
         if (shadowRoot) {
-            shadowRoot.innerHTML = props.htmlContent;
+            shadowRoot.innerHTML = sanitizeMailHtml(props.htmlContent);
         }
     } catch (error) {
         console.error('Failed to render Shadow DOM, falling back to v-html:', error);

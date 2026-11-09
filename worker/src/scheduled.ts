@@ -11,26 +11,14 @@ export async function scheduled(event: ScheduledEvent, env: Bindings, ctx: any) 
         CONSTANTS.AUTO_CLEANUP_KEY
     );
     const autoCleanupSetting = new CleanupSettings(value);
-    console.log("autoCleanupSetting:", JSON.stringify(autoCleanupSetting));
-    if (autoCleanupSetting.enableMailsAutoCleanup && autoCleanupSetting.cleanMailsDays > 0) {
-        await cleanup(
-            { env: env, } as Context<HonoCustomType>,
-            "mails",
-            autoCleanupSetting.cleanMailsDays
-        );
-    }
-    if (autoCleanupSetting.enableUnknowMailsAutoCleanup && autoCleanupSetting.cleanUnknowMailsDays > 0) {
-        await cleanup(
-            { env: env, } as Context<HonoCustomType>,
-            "mails_unknow",
-            autoCleanupSetting.cleanUnknowMailsDays
-        );
-    }
-    if (autoCleanupSetting.enableSendBoxAutoCleanup && autoCleanupSetting.cleanSendBoxDays > 0) {
-        await cleanup(
-            { env: env, } as Context<HonoCustomType>,
-            "sendbox",
-            autoCleanupSetting.cleanSendBoxDays
-        );
+    const tasks = [
+        [autoCleanupSetting.enableMailsAutoCleanup, autoCleanupSetting.cleanMailsDays, "mails"],
+        [autoCleanupSetting.enableUnknowMailsAutoCleanup, autoCleanupSetting.cleanUnknowMailsDays, "mails_unknow"],
+        [autoCleanupSetting.enableSendBoxAutoCleanup, autoCleanupSetting.cleanSendBoxDays, "sendbox"],
+    ] as const;
+    for (const [enabled, days, kind] of tasks) {
+        if (!enabled || !(days > 0)) continue;
+        try { await cleanup({ env } as Context<HonoCustomType>, kind, days); }
+        catch { console.error(JSON.stringify({event:"scheduled_cleanup_failure", kind})); }
     }
 }

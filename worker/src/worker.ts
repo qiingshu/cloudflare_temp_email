@@ -1,4 +1,5 @@
 import { Context, Hono } from 'hono'
+import { mailSecurityAddressIdentity } from './mail-security'
 import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt'
 import { Jwt } from 'hono/utils/jwt'
@@ -150,7 +151,10 @@ app.use('/api/*', async (c, next) => {
 	}
 
 	try {
-		return await jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, next);
+		return await jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, async () => {
+            if (!await mailSecurityAddressIdentity(c.env, c.get("jwtPayload"))) throw new Error("Invalid address credential");
+            await next();
+        });
 	} catch (e) {
 		console.warn(e);
 		const lang = c.get("lang") || c.env.DEFAULT_LANG;

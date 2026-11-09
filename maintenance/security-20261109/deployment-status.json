@@ -1,0 +1,11 @@
+{
+  "status": "staged-not-active",
+  "worker_candidate": "e924fd72-82b4-42c3-a7e8-95b181b501ee",
+  "worker_live": "3a73ce6e-bd26-4fab-af5a-4455904efe33",
+  "pages_live": "d1fdedfc-5dad-4f5c-a821-860e40ec13dc",
+  "preview_checks": {
+    "health": 200,
+    "unsigned_webhook": 401
+  },
+  "production_data_modified": false
+}
