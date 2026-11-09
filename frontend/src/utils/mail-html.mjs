@@ -16,3 +16,21 @@ export function mailTextHtml(value) {
   node.textContent = String(value ?? '');
   return node.outerHTML;
 }
+
+// Sandboxed srcdoc has an opaque origin and cannot load parent-origin blob URLs.
+// Resolve only images belonging to this parsed message, never arbitrary URLs.
+export async function mailIframeHtml(value, attachments = []) {
+  const doc = new DOMParser().parseFromString(sanitizeMailHtml(value), 'text/html');
+  await Promise.all(Array.from(doc.querySelectorAll('img[src]'), async image => {
+    const attachment = attachments.find(item => item.url === image.getAttribute('src'));
+    if (!attachment?.blob || !attachment.blob.type.startsWith('image/')) return;
+    const data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(attachment.blob);
+    });
+    image.setAttribute('src', data);
+  }));
+  return sanitizeMailHtml(doc.body.innerHTML);
+}
