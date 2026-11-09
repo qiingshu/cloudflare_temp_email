@@ -15,12 +15,13 @@
 
 2026-11-09 本地完成：
 
-- Worker 六个 Node 测试：旧凭证拒绝及 KV 不变、合法绑定/投递、陌生人解绑、删除旧 id 时保留新 id、D1 故障拒绝个人投递、实际推送函数保留全局推送、带真实测试 HMAC 的 Mini App 绑定拒绝及列表过滤。
-- 前端三个 Node/jsdom 测试：两处发件箱接线与纯文本路径、实际编译挂载 Shadow 组件清洗恶意 HTML 并保留正常正文/链接、无 Shadow DOM 回退去除全局 style。
+- Worker 八个 Node 测试：旧凭证拒绝及 KV 不变、合法绑定/投递、陌生人解绑、删除旧 id 时保留新 id、D1 故障拒绝个人投递、实际推送函数保留全局推送、带真实测试 HMAC 的 Mini App 绑定拒绝及列表过滤；新增两个实际 Hono DELETE 路由测试，分别覆盖正常清理和 KV put 失败，断言六条删除语句在一次 batch 内执行、清理确实被调用、响应成功、同名重建后不向旧用户推送。
+- 前端四个 Node/jsdom 测试：两处发件箱接线与纯文本路径、实际编译挂载 Shadow 组件清洗恶意 HTML、无 Shadow DOM 回退去除全局 style，以及未清洗 onerror 载荷能执行的负向对照。样式载荷位于正文中间，断言 style 确实保留在 shadowRoot 且不在 light DOM；断言表格、内联颜色、HTTPS 图片和 data 图片保留。
+- 增量变异验证：临时去掉管理员路由的 prune 调用，两个新 HTTP 测试均失败；临时让 Shadow 路径错误使用非隔离清洗，前端样式断言失败。随后恢复实现并重跑全部 12 项测试。探针没有提交。
 - Worker ESLint 通过；Wrangler 4.15.2 明确入口与兼容参数 dry-run 打包通过（没有绑定、没有上传）。仓库仅有 wrangler.toml.template，原 build 命令在未配置的干净 clone 不能直接运行；新增 build:security 提供无凭据打包检查。
 - 前端 Vite prod 构建通过。开发依赖增加锁定版本 esbuild 0.25.4、jsdom 26.1.0，仅用于测试；没有批量升级运行依赖。前端 lockfile 有 jsdom 依赖及可选 peer 图重解析变更。
 
-测试使用实际仓库源码：Worker 测试由 esbuild 打包目标模块，模拟 KV、D1 和 Telegram 发送边界及无关配置/邮件解析函数；前端使用 Vue 编译并在 jsdom 挂载组件。**不是原生 workerd/D1 或真实浏览器端到端验证**。尚未完成管理员 HTTP 删除路由的故障注入、完整转让 HTTP 流程、真实 Telegram/生产产物验收；第三方复核应重点检查这些关联路径。
+测试使用实际仓库源码：Worker 测试由 esbuild 打包目标模块，模拟 KV、D1 和 Telegram 发送边界及无关配置/邮件解析函数；管理员删除使用真实 Hono 路由、mailSecurityDeleteAddress 和 prune helper，其余管理员端点被桩替换，未包含外层管理员鉴权中间件。前端使用 Vue 编译并在 jsdom 挂载组件，SendBox 本身仍是静态接线检查。**不是原生 workerd/D1 或真实浏览器端到端验证**。完整转让 HTTP 流程、旧凭证读取路径回归、v1 发件记录组件测试、真实 Telegram/生产产物验收仍未覆盖。本轮仅补两项复核要求，没有改动运行源码。
 
 ## 保留风险与兼容性
 
