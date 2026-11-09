@@ -6,7 +6,7 @@ import { callbackQuery } from "telegraf/filters";
 import { CONSTANTS } from "../constants";
 import { getDomains, getJsonObjectValue, getStringValue } from '../utils';
 import { TelegramSettings } from "./settings";
-import { bindTelegramAddress, deleteTelegramAddress, jwtListToAddressData, tgUserNewAddress, unbindTelegramAddress, unbindTelegramByAddress } from "./common";
+import { bindTelegramAddress, deleteTelegramAddress, jwtListToAddressData, tgUserNewAddress, unbindTelegramAddress, unbindTelegramByAddress, telegramOwnsCurrentAddress } from "./common";
 import { commonParseMail } from "../common";
 import { UserFromGetMe } from "telegraf/types";
 
@@ -367,6 +367,9 @@ export async function sendMailToTelegram(
     if (!userId) {
         return;
     }
+    // A routing hint alone never authorizes disclosure. Failure stays closed
+    // for personal delivery; global administrator delivery above is unchanged.
+    if (!await telegramOwnsCurrentAddress(c, userId, address)) return;
     await bot.telegram.sendMessage(userId, mail, {
         ...Markup.inlineKeyboard([
             ...miniAppButtons,

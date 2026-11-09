@@ -1,5 +1,5 @@
 <template>
-    <div v-if="useFallback" v-html="sanitizeMailHtml(htmlContent)"></div>
+    <div v-if="useFallback" v-html="sanitizeMailHtml(htmlContent, { isolated: false })"></div>
     <div v-else ref="shadowHost"></div>
 </template>
 
