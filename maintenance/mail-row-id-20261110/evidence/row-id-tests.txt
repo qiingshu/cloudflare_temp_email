@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: repeated/missing Message-ID=<duplicate@fixture> links each new row
+ok 1 - repeated/missing Message-ID=<duplicate@fixture> links each new row
+  ---
+  duration_ms: 32.294976
+  type: 'test'
+  ...
+# Subtest: repeated/missing Message-ID=null links each new row
+ok 2 - repeated/missing Message-ID=null links each new row
+  ---
+  duration_ms: 20.77861
+  type: 'test'
+  ...
+# Subtest: same-address concurrent receives retain per-request INSERT identity
+ok 3 - same-address concurrent receives retain per-request INSERT identity
+  ---
+  duration_ms: 25.688704
+  type: 'test'
+  ...
+# Subtest: different addresses with same Message-ID never cross personal recipients or links
+ok 4 - different addresses with same Message-ID never cross personal recipients or links
+  ---
+  duration_ms: 22.524182
+  type: 'test'
+  ...
+# Subtest: insert failure=true cannot reuse old row or send links
+ok 5 - insert failure=true cannot reuse old row or send links
+  ---
+  duration_ms: 1.537712
+  type: 'test'
+  ...
+# Subtest: insert failure=throw cannot reuse old row or send links
+ok 6 - insert failure=throw cannot reuse old row or send links
+  ---
+  duration_ms: 3.93028
+  type: 'test'
+  ...
+# Subtest: insert failure=missing cannot reuse old row or send links
+ok 7 - insert failure=missing cannot reuse old row or send links
+  ---
+  duration_ms: 16.637254
+  type: 'test'
+  ...
+# Subtest: row ID does not authorize stale personal Telegram credentials
+ok 8 - row ID does not authorize stale personal Telegram credentials
+  ---
+  duration_ms: 17.57162
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 145.494617

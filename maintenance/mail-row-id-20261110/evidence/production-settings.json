@@ -1,0 +1,151 @@
+{
+  "deployment": "5d555693-b3d9-4f74-875d-f487083d7d2c",
+  "versions": [
+    {
+      "version_id": "6ca47042-7f2b-4da5-9a26-7b9717ce182c",
+      "percentage": 100
+    }
+  ],
+  "compatibility_date": "2025-05-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "bindings": [
+    {
+      "name": "ADMIN_AUTH_LIMITER",
+      "type": "ratelimit"
+    },
+    {
+      "name": "ADMIN_CONTACT",
+      "type": "plain_text"
+    },
+    {
+      "name": "ADMIN_PASSWORDS",
+      "type": "secret_text"
+    },
+    {
+      "name": "ADMIN_USER_ROLE",
+      "type": "plain_text"
+    },
+    {
+      "name": "ANNOUNCEMENT",
+      "type": "plain_text"
+    },
+    {
+      "name": "ANOTHER_WORKER_LIST",
+      "type": "json"
+    },
+    {
+      "name": "AUTH_INBOX",
+      "type": "service"
+    },
+    {
+      "name": "BLACK_LIST",
+      "type": "plain_text"
+    },
+    {
+      "name": "CF_TURNSTILE_SECRET_KEY",
+      "type": "secret_text"
+    },
+    {
+      "name": "CF_TURNSTILE_SITE_KEY",
+      "type": "secret_text"
+    },
+    {
+      "name": "COPYRIGHT",
+      "type": "plain_text"
+    },
+    {
+      "name": "DB",
+      "type": "d1"
+    },
+    {
+      "name": "DEFAULT_DOMAINS",
+      "type": "json"
+    },
+    {
+      "name": "DOMAINS",
+      "type": "json"
+    },
+    {
+      "name": "ENABLE_ANOTHER_WORKER",
+      "type": "json"
+    },
+    {
+      "name": "ENABLE_AUTO_REPLY",
+      "type": "plain_text"
+    },
+    {
+      "name": "ENABLE_USER_CREATE_EMAIL",
+      "type": "plain_text"
+    },
+    {
+      "name": "ENABLE_USER_DELETE_EMAIL",
+      "type": "plain_text"
+    },
+    {
+      "name": "FRONTEND_URL",
+      "type": "plain_text"
+    },
+    {
+      "name": "JWT_SECRET",
+      "type": "secret_text"
+    },
+    {
+      "name": "KV",
+      "type": "kv_namespace"
+    },
+    {
+      "name": "LOGIN_LIMITER",
+      "type": "ratelimit"
+    },
+    {
+      "name": "NO_LIMIT_SEND_ROLE",
+      "type": "plain_text"
+    },
+    {
+      "name": "RATE_LIMITER",
+      "type": "ratelimit"
+    },
+    {
+      "name": "RESEND_TOKEN",
+      "type": "secret_text"
+    },
+    {
+      "name": "SMTP_CONFIG",
+      "type": "secret_text"
+    },
+    {
+      "name": "TELEGRAM_BOT_TOKEN",
+      "type": "secret_text"
+    },
+    {
+      "name": "TG_MAX_ADDRESS",
+      "type": "plain_text"
+    },
+    {
+      "name": "TITLE",
+      "type": "plain_text"
+    },
+    {
+      "name": "USER_ROLES",
+      "type": "json"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": false,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  }
+}

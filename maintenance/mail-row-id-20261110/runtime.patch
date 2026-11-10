@@ -1,0 +1,117 @@
+--- a/index.js
++++ b/index.js
+@@ -35684,20 +35684,49 @@
+ }
+ __name(gb, "gb");
+ s(gb, "sendWebhook");
+-async function lH(e34, t, r, n) {
+-  if (!e34.env.KV || !$e(e34.env.ENABLE_WEBHOOK)) return;
+-  let i = [], o = await e34.env.KV.get(pe.WEBHOOK_KV_ADMIN_MAIL_SETTINGS_KEY, "json");
+-  if (o?.enabled && i.push(o), (await e34.env.KV.get(pe.WEBHOOK_KV_SETTINGS_KEY, "json"))?.allowList.includes(t)) {
+-    let b = await e34.env.KV.get(`${pe.WEBHOOK_KV_USER_SETTINGS_KEY}:${t}`, "json");
+-    b?.enabled && i.push(b);
+-  }
+-  if (i.length === 0) return;
+-  let u = await e34.env.DB.prepare("SELECT id FROM raw_mails where address = ? and message_id = ?").bind(t, n).first("id"), f = await _o(r), p = { id: u || "", url: e34.env.FRONTEND_URL ? `${e34.env.FRONTEND_URL}?mail_id=${u}` : "", from: f?.sender || "", to: t, subject: f?.subject || "", raw: r.rawEmail || "", parsedText: f?.text || "", parsedHtml: f?.html || "" };
+-  for (let b of i) {
+-    let E = await gb(b, p);
+-    E.success || console.error(E.message);
+-  }
+-}
++async function lH(c, address, parsedEmailContext, storedMailId) {
++  if (!Number.isSafeInteger(storedMailId) || !storedMailId || storedMailId < 1) return;
++  if (!c.env.KV || !$e(c.env.ENABLE_WEBHOOK)) {
++    return;
++  }
++  const webhookList = [];
++  const adminMailWebhookSettings = await c.env.KV.get(pe.WEBHOOK_KV_ADMIN_MAIL_SETTINGS_KEY, "json");
++  if (adminMailWebhookSettings?.enabled) {
++    webhookList.push(adminMailWebhookSettings);
++  }
++  const adminSettings = await c.env.KV.get(pe.WEBHOOK_KV_SETTINGS_KEY, "json");
++  if (adminSettings?.allowList.includes(address)) {
++    const settings = await c.env.KV.get(
++      `${pe.WEBHOOK_KV_USER_SETTINGS_KEY}:${address}`,
++      "json"
++    );
++    if (settings?.enabled) {
++      webhookList.push(settings);
++    }
++  }
++  if (webhookList.length === 0) {
++    return;
++  }
++  const mailId = String(storedMailId);
++  const parsedEmail = await _o(parsedEmailContext);
++  const webhookMail = {
++    id: mailId || "",
++    url: c.env.FRONTEND_URL ? `${c.env.FRONTEND_URL}?mail_id=${mailId}` : "",
++    from: parsedEmail?.sender || "",
++    to: address,
++    subject: parsedEmail?.subject || "",
++    raw: parsedEmailContext.rawEmail || "",
++    parsedText: parsedEmail?.text || "",
++    parsedHtml: parsedEmail?.html || ""
++  };
++  for (const settings of webhookList) {
++    const res = await gb(settings, webhookMail);
++    if (!res.success) {
++      console.error(res.message);
++    }
++  }
++}
++
+ __name(lH, "lH");
+ s(lH, "triggerWebhook");
+ async function dH(e34, t, r) {
+@@ -43801,7 +43830,8 @@
+     return { isHtml: false, mail: `\u89E3\u6790\u90AE\u4EF6\u5931\u8D25: ${n.message}` };
+   }
+ }, "parseMail");
+-async function _P(c, address, parsedEmailContext, message_id) {
++async function _P(c, address, parsedEmailContext, storedMailId) {
++  if (!Number.isSafeInteger(storedMailId) || !storedMailId || storedMailId < 1) return;
+   if (!c.env.TELEGRAM_BOT_TOKEN || !c.env.KV) {
+     return;
+   }
+@@ -43815,9 +43845,7 @@
+   if (!userId && !globalPush) {
+     return;
+   }
+-  const mailId = await c.env.DB.prepare(
+-    `SELECT id FROM raw_mails where address = ? and message_id = ?`
+-  ).bind(address, message_id).first("id");
++  const mailId = String(storedMailId);
+   const bot = uv(c, c.env.TELEGRAM_BOT_TOKEN);
+   const miniAppButtons = [];
+   if (settings?.miniAppUrl && settings?.miniAppUrl?.length > 0 && mailId) {
+@@ -44078,10 +44106,11 @@
+   } catch (a) {
+     console.error("remove attachment error", a);
+   }
+-  let o = e34.headers.get("Message-ID");
++  let o = e34.headers.get("Message-ID"), storedMailId;
+   try {
+-    let { success: a } = await t.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind(e34.from, e34.to, i.rawEmail, o).run();
+-    a || (e34.setReject(`Failed save message to ${e34.to}`), console.error(`Failed save message from ${e34.from} to ${e34.to}`));
++    let { success: a, meta } = await t.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind(e34.from, e34.to, i.rawEmail, o).run();
++    if (a && Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) storedMailId = meta.last_row_id;
++    else (e34.setReject(`Failed save message to ${e34.to}`), console.error(`Failed save message from ${e34.from} to ${e34.to}`));
+   } catch (a) {
+     console.error("save email error", a);
+   }
+@@ -44097,12 +44126,12 @@
+     console.error("forward email error", a);
+   }
+   try {
+-    await _P({ env: t }, e34.to, i, o);
++    await _P({ env: t }, e34.to, i, storedMailId);
+   } catch (a) {
+     console.error("send mail to telegram error", a);
+   }
+   try {
+-    await lH({ env: t }, e34.to, i, o);
++    await lH({ env: t }, e34.to, i, storedMailId);
+   } catch (a) {
+     console.error("send webhook error", a);
+   }
