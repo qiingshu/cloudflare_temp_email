@@ -68,11 +68,11 @@ test('actual delivery skips stale owner, preserves global delivery, sends curren
   const {c,data}=fixture(); c.env.TELEGRAM_BOT_TOKEN='local-only'; globalThis.__sent=[];
   data.set(prefix+'a@test.invalid','111'); data.set(prefix+'111',JSON.stringify([await token(7)]));
   data.set(CONSTANTS.TG_KV_SETTINGS_KEY,JSON.stringify({enableGlobalMailPush:true,globalMailPushList:['999']}));
-  await sendMailToTelegram(c,'a@test.invalid',{rawEmail:'fixture'},'msg');
+  await sendMailToTelegram(c,'a@test.invalid',{rawEmail:'fixture'},101);
   assert.deepEqual(globalThis.__sent.map(m=>m.id),['999']);
   globalThis.__sent=[]; data.delete(CONSTANTS.TG_KV_SETTINGS_KEY);
   await bindTelegramAddress(c,'222',await token(8));
-  await sendMailToTelegram(c,'a@test.invalid',{rawEmail:'fixture'},'msg');
+  await sendMailToTelegram(c,'a@test.invalid',{rawEmail:'fixture'},101);
   assert.deepEqual(globalThis.__sent.map(m=>m.id),['222']);
   assert.match(globalThis.__sent[0].text,/Subject: test/);
 });
@@ -130,7 +130,11 @@ for (const failCleanup of [false,true]) {
     // Same-name recreation leaves the old routing hint, including when KV
     // failed. Exercise the real send function, not just the identity helper.
     currentId='8';globalThis.__sent=[];
-    await sendMailToTelegram(c,name,{rawEmail:'fixture'},'new-message');
+    await sendMailToTelegram(c,name,{rawEmail:'fixture'},102);
     assert.deepEqual(globalThis.__sent,[]);
+    // Positive control with the same nonzero row ID proves delivery reached the ownership gate.
+    data.set(prefix+'111',JSON.stringify([await token(8)]));
+    await sendMailToTelegram(c,name,{rawEmail:'fixture'},102);
+    assert.deepEqual(globalThis.__sent.map(m=>m.id),['111']);
   });
 }

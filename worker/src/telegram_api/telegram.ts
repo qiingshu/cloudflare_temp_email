@@ -329,8 +329,9 @@ const parseMail = async (
 export async function sendMailToTelegram(
     c: Context<HonoCustomType>, address: string,
     parsedEmailContext: ParsedEmailContext,
-    message_id: string | null
+    storedMailId: number | undefined
 ) {
+    if (!Number.isSafeInteger(storedMailId) || !storedMailId || storedMailId < 1) return;
     if (!c.env.TELEGRAM_BOT_TOKEN || !c.env.KV) {
         return;
     }
@@ -344,9 +345,7 @@ export async function sendMailToTelegram(
     if (!userId && !globalPush) {
         return;
     }
-    const mailId = await c.env.DB.prepare(
-        `SELECT id FROM raw_mails where address = ? and message_id = ?`
-    ).bind(address, message_id).first<string>("id");
+    const mailId = String(storedMailId);
     const bot = newTelegramBot(c, c.env.TELEGRAM_BOT_TOKEN);
     const miniAppButtons = []
     if (settings?.miniAppUrl && settings?.miniAppUrl?.length > 0 && mailId) {

@@ -368,8 +368,9 @@ export async function triggerWebhook(
     c: Context<HonoCustomType>,
     address: string,
     parsedEmailContext: ParsedEmailContext,
-    message_id: string | null
+    storedMailId: number | undefined
 ): Promise<void> {
+    if (!Number.isSafeInteger(storedMailId) || !storedMailId || storedMailId < 1) return;
     if (!c.env.KV || !getBooleanValue(c.env.ENABLE_WEBHOOK)) {
         return
     }
@@ -396,9 +397,7 @@ export async function triggerWebhook(
     if (webhookList.length === 0) {
         return
     }
-    const mailId = await c.env.DB.prepare(
-        `SELECT id FROM raw_mails where address = ? and message_id = ?`
-    ).bind(address, message_id).first<string>("id");
+    const mailId = String(storedMailId);
 
     const parsedEmail = await commonParseMail(parsedEmailContext);
     const webhookMail = {

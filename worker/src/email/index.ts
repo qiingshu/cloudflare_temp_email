@@ -40,9 +40,10 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
     }
 
     const message_id = message.headers.get("Message-ID");
+    let storedMailId: number | undefined;
     // save email
     try {
-        const { success } = await env.DB.prepare(
+        const { success, meta } = await env.DB.prepare(
             `INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)`
         ).bind(
             message.from, message.to, parsedEmailContext.rawEmail, message_id
@@ -50,9 +51,15 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         if (!success) {
             message.setReject(`Failed save message to ${message.to}`);
             console.error(`Failed save message from ${message.from} to ${message.to}`);
+        } else if (Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) {
+            storedMailId = meta.last_row_id;
+        } else {
+            // The INSERT succeeded: retain the mail, but never guess its row ID.
+            console.error(JSON.stringify({ event: "mail_row_id_unavailable" }));
         }
     }
     catch (error) {
+        message.setReject(`Failed save message to ${message.to}`);
         console.error("save email error", error);
     }
 
@@ -94,7 +101,7 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
     try {
         await sendMailToTelegram(
             { env: env } as Context<HonoCustomType>,
-            message.to, parsedEmailContext, message_id);
+            message.to, parsedEmailContext, storedMailId);
     } catch (error) {
         console.error("send mail to telegram error", error);
     }
@@ -103,7 +110,7 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
     try {
         await triggerWebhook(
             { env: env } as Context<HonoCustomType>,
-            message.to, parsedEmailContext, message_id
+            message.to, parsedEmailContext, storedMailId
         );
     } catch (error) {
         console.error("send webhook error", error);
