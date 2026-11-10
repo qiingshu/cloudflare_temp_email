@@ -16,9 +16,9 @@
 
 ## 验证与复现
 
-8组回归通过，完整TAP在evidence/row-id-tests.txt。实际候选包执行接收邮件函数及真实解析/签名/地址归属函数，数据库为Node内存SQLite；INSERT返回结果映射为D1 meta.last_row_id，并故意交错完成16路同地址收件。覆盖重复/缺失Message-ID、不同地址相同Message-ID、失败/异常/缺失ID、个人链接和收件人归属、旧凭证拒绝。数据库夹具禁止反查raw_mails。Telegram仅在测试中替换一次callApi并通过AsyncLocalStorage按请求记录；webhook全局fetch同样只记录夹具，不真实发送。当前没有AI提取路径，因此没有伪称测试AI输出。
+11组行ID回归通过，完整TAP在evidence/row-id-tests.txt。实际候选包执行接收邮件函数及真实解析/签名/地址归属函数，数据库为Node内存SQLite；INSERT返回结果映射为D1 meta.last_row_id，并故意交错完成16路同地址收件。覆盖重复/缺失Message-ID、不同地址相同Message-ID、失败/异常/缺失ID、个人链接和收件人归属、旧凭证拒绝。数据库夹具禁止反查raw_mails。Telegram仅在测试中替换一次callApi并通过AsyncLocalStorage按请求记录；webhook全局fetch同样只记录夹具，不真实发送。当前没有AI提取路径，因此没有伪称测试AI输出。
 
-独立准备：在本目录放入重新获取且哈希一致的runtime/baseline.js，使用已锁定worker开发依赖，执行 `node prepare.cjs`。它验证基线哈希，输出candidate.js及只用于Node的candidate-test.mjs（仅将cloudflare:sockets替换成拒绝访问桩，并添加测试导出），不会上传或部署。执行 `node row-id.test.mjs`，检查TAP为8通过0失败。当前实际使用Node22.23.3及esbuild0.25.4。Wrangler4.151.1对无绑定临时配置完成dry-run打包，输出见evidence/dry-run.txt；未升级项目锁文件或依赖。原生workerd/D1、真实邮件和Telegram端到端未执行，不将SQLite契约夹具称为原生D1测试。
+独立准备：在本目录放入重新获取且哈希一致的runtime/baseline.js，使用已锁定worker开发依赖，执行 `node prepare.cjs`。它验证基线哈希，输出candidate.js及只用于Node的candidate-test.mjs（仅将cloudflare:sockets替换成拒绝访问桩，并添加测试导出），不会上传或部署。执行 `node row-id.test.mjs`，检查TAP为11通过0失败。当前实际使用Node22.23.3及esbuild0.25.4。Wrangler4.151.1对无绑定临时配置完成dry-run打包，输出见evidence/dry-run.txt；未升级项目锁文件或依赖。原生workerd/D1、真实邮件和Telegram端到端未执行，不将SQLite契约夹具称为原生D1测试。
 
 已验收登录/退出和发件箱浏览器证据沿用上一轮（maintenance/security-20261109及telegram-sendbox-20261109.md）。相关运行字节和Pages此次完全不变，不重复宽泛扫描。没有整体同步上游前端、依赖或迁移。
 
@@ -31,3 +31,11 @@
 恢复只将email的流量切回版本6ca47042-7f2b-4da5-9a26-7b9717ce182c，保持现有设置和Pages；若版本不可取得，用校验过的原包及当前配置恢复，不能从旧fork重建。回滚不会撤销已发送通知/新邮件；本次未发送真实通知。无需数据库回滚。完整源码、差异、复核输出均附哈希；剩余既有KV传播和并发读改写限制保持原记录。
 
 D1契约依据 https://developers.cloudflare.com/d1/worker-api/prepared-statements/ 。
+
+## 本轮最小修正
+
+源码telegram-isolation.test.mjs三处旧字符串参数改为正整数行ID；同名重建两组各有相同有效行ID的正向投递对照。源码test:security 8/8通过。仅删除telegramOwnsCurrentAddress校验的定向变异被源码入口检出，数字行ID守卫始终保留；源码恢复后8/8再次通过。未按变异数量扩大范围。
+
+INSERT成功与ID有效性现独立判断：success=true但ID为0、1.5、字符串或缺失时，SQLite夹具确认已插入行保留，setReject=0、Telegram=0、webhook=0，并仅记录固定mail_row_id_unavailable事件（无地址/Message-ID/原始ID/邮件正文）。success=false或INSERT抛异常时，setReject=1、插入行=0、推送=0。正常正整数仍完整投递，旧凭证仍拒绝。行ID链路11/11通过，源码和完整线上派生bundle同步。
+
+只读PRAGMA返回的last_row_id=0是该只读语句的元信息，不能据此推断INSERT会返回0。新增异常ID用例是防御性契约夹具，不是对生产INSERT行为的断言。本轮没有真实收信、生产SQL写入或真实Telegram调用。相关证据source-security.txt、row-id-tests.txt、ownership-mutation.json/txt均附实际哈希。

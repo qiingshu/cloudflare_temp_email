@@ -1,0 +1,63 @@
+
+> cloudflare_temp_email@0.10.0 test:security
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: old identity cannot bind or overwrite, current credential authorizes delivery
+ok 1 - old identity cannot bind or overwrite, current credential authorizes delivery
+  ---
+  duration_ms: 7.126703
+  type: 'test'
+  ...
+# Subtest: stranger unbind does not remove another user routing or authorization
+ok 2 - stranger unbind does not remove another user routing or authorization
+  ---
+  duration_ms: 2.976914
+  type: 'test'
+  ...
+# Subtest: deleted-id cleanup preserves a newly created same-name credential
+ok 3 - deleted-id cleanup preserves a newly created same-name credential
+  ---
+  duration_ms: 2.079487
+  type: 'test'
+  ...
+# Subtest: unavailable D1 never authorizes personal delivery
+ok 4 - unavailable D1 never authorizes personal delivery
+  ---
+  duration_ms: 2.619533
+  type: 'test'
+  ...
+# Subtest: actual delivery skips stale owner, preserves global delivery, sends current owner once
+ok 5 - actual delivery skips stale owner, preserves global delivery, sends current owner once
+  ---
+  duration_ms: 2.017531
+  type: 'test'
+  ...
+# Subtest: authenticated Mini App rejects old bind and filters old credentials from its list
+ok 6 - authenticated Mini App rejects old bind and filters old credentials from its list
+  ---
+  duration_ms: 18.953337
+  type: 'test'
+  ...
+# Subtest: admin DELETE HTTP runs atomic deletion and survives cleanup failure=false
+ok 7 - admin DELETE HTTP runs atomic deletion and survives cleanup failure=false
+  ---
+  duration_ms: 7.89647
+  type: 'test'
+  ...
+# Telegram deleted-address cleanup failed
+# Subtest: admin DELETE HTTP runs atomic deletion and survives cleanup failure=true
+ok 8 - admin DELETE HTTP runs atomic deletion and survives cleanup failure=true
+  ---
+  duration_ms: 2.911471
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 148.452777

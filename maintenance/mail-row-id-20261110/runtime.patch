@@ -85,7 +85,7 @@
    const bot = uv(c, c.env.TELEGRAM_BOT_TOKEN);
    const miniAppButtons = [];
    if (settings?.miniAppUrl && settings?.miniAppUrl?.length > 0 && mailId) {
-@@ -44078,10 +44106,11 @@
+@@ -44078,11 +44106,14 @@
    } catch (a) {
      console.error("remove attachment error", a);
    }
@@ -96,11 +96,14 @@
 -    a || (e34.setReject(`Failed save message to ${e34.to}`), console.error(`Failed save message from ${e34.from} to ${e34.to}`));
 +    let { success: a, meta } = await t.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind(e34.from, e34.to, i.rawEmail, o).run();
 +    if (a && Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) storedMailId = meta.last_row_id;
++    else if (a) console.error(JSON.stringify({ event: "mail_row_id_unavailable" }));
 +    else (e34.setReject(`Failed save message to ${e34.to}`), console.error(`Failed save message from ${e34.from} to ${e34.to}`));
    } catch (a) {
++    e34.setReject(`Failed save message to ${e34.to}`);
      console.error("save email error", a);
    }
-@@ -44097,12 +44126,12 @@
+   try {
+@@ -44097,12 +44128,12 @@
      console.error("forward email error", a);
    }
    try {

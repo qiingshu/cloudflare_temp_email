@@ -1,0 +1,160 @@
+
+> cloudflare_temp_email@0.10.0 test:security
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: old identity cannot bind or overwrite, current credential authorizes delivery
+ok 1 - old identity cannot bind or overwrite, current credential authorizes delivery
+  ---
+  duration_ms: 5.85301
+  type: 'test'
+  ...
+# Subtest: stranger unbind does not remove another user routing or authorization
+ok 2 - stranger unbind does not remove another user routing or authorization
+  ---
+  duration_ms: 2.210776
+  type: 'test'
+  ...
+# Subtest: deleted-id cleanup preserves a newly created same-name credential
+ok 3 - deleted-id cleanup preserves a newly created same-name credential
+  ---
+  duration_ms: 1.749347
+  type: 'test'
+  ...
+# Subtest: unavailable D1 never authorizes personal delivery
+ok 4 - unavailable D1 never authorizes personal delivery
+  ---
+  duration_ms: 2.556143
+  type: 'test'
+  ...
+# Subtest: actual delivery skips stale owner, preserves global delivery, sends current owner once
+not ok 5 - actual delivery skips stale owner, preserves global delivery, sends current owner once
+  ---
+  duration_ms: 2.033152
+  type: 'test'
+  location: '/root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:67:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        '999',
+    +   '111'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: '999'
+  actual:
+    0: '999'
+    1: '111'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:72:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: authenticated Mini App rejects old bind and filters old credentials from its list
+ok 6 - authenticated Mini App rejects old bind and filters old credentials from its list
+  ---
+  duration_ms: 18.025163
+  type: 'test'
+  ...
+# Subtest: admin DELETE HTTP runs atomic deletion and survives cleanup failure=false
+not ok 7 - admin DELETE HTTP runs atomic deletion and survives cleanup failure=false
+  ---
+  duration_ms: 4.802164
+  type: 'test'
+  location: '/root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:94:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   {
+    +     id: '111',
+    +     text: 'From: 无发件人\n' +
+    +       'To: a@test.invalid\n' +
+    +       'Date: Tue, 10 Nov 2026 14:43:29 GMT\n' +
+    +       'Subject: test\n' +
+    +       'Content:\n' +
+    +       'body'
+    +   }
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: '111'
+      text: |-
+        From: 无发件人
+        To: a@test.invalid
+        Date: Tue, 10 Nov 2026 14:43:29 GMT
+        Subject: test
+        Content:
+        body
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Telegram deleted-address cleanup failed
+# Subtest: admin DELETE HTTP runs atomic deletion and survives cleanup failure=true
+not ok 8 - admin DELETE HTTP runs atomic deletion and survives cleanup failure=true
+  ---
+  duration_ms: 4.186538
+  type: 'test'
+  location: '/root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:94:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   {
+    +     id: '111',
+    +     text: 'From: 无发件人\n' +
+    +       'To: a@test.invalid\n' +
+    +       'Date: Tue, 10 Nov 2026 14:43:29 GMT\n' +
+    +       'Subject: test\n' +
+    +       'Content:\n' +
+    +       'body'
+    +   }
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      id: '111'
+      text: |-
+        From: 无发件人
+        To: a@test.invalid
+        Date: Tue, 10 Nov 2026 14:43:29 GMT
+        Subject: test
+        Content:
+        body
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///root/Documents/Codex/2026-11-10/a-b-c-pr-fork-a/email-pr/worker/test/telegram-isolation.test.mjs:134:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 5
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 136.888593

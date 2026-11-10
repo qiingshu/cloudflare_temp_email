@@ -44110,8 +44110,10 @@ async function xQ(e34, t, r) {
   try {
     let { success: a, meta } = await t.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind(e34.from, e34.to, i.rawEmail, o).run();
     if (a && Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) storedMailId = meta.last_row_id;
+    else if (a) console.error(JSON.stringify({ event: "mail_row_id_unavailable" }));
     else (e34.setReject(`Failed save message to ${e34.to}`), console.error(`Failed save message from ${e34.from} to ${e34.to}`));
   } catch (a) {
+    e34.setReject(`Failed save message to ${e34.to}`);
     console.error("save email error", a);
   }
   try {

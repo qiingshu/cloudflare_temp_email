@@ -48,14 +48,18 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         ).bind(
             message.from, message.to, parsedEmailContext.rawEmail, message_id
         ).run();
-        if (success && Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) {
-            storedMailId = meta.last_row_id;
-        } else {
+        if (!success) {
             message.setReject(`Failed save message to ${message.to}`);
             console.error(`Failed save message from ${message.from} to ${message.to}`);
+        } else if (Number.isSafeInteger(meta?.last_row_id) && meta.last_row_id > 0) {
+            storedMailId = meta.last_row_id;
+        } else {
+            // The INSERT succeeded: retain the mail, but never guess its row ID.
+            console.error(JSON.stringify({ event: "mail_row_id_unavailable" }));
         }
     }
     catch (error) {
+        message.setReject(`Failed save message to ${message.to}`);
         console.error("save email error", error);
     }
 

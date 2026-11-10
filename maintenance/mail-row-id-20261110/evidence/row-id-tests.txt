@@ -2,57 +2,75 @@ TAP version 13
 # Subtest: repeated/missing Message-ID=<duplicate@fixture> links each new row
 ok 1 - repeated/missing Message-ID=<duplicate@fixture> links each new row
   ---
-  duration_ms: 32.294976
+  duration_ms: 52.578135
   type: 'test'
   ...
 # Subtest: repeated/missing Message-ID=null links each new row
 ok 2 - repeated/missing Message-ID=null links each new row
   ---
-  duration_ms: 20.77861
+  duration_ms: 21.504843
   type: 'test'
   ...
 # Subtest: same-address concurrent receives retain per-request INSERT identity
 ok 3 - same-address concurrent receives retain per-request INSERT identity
   ---
-  duration_ms: 25.688704
+  duration_ms: 28.193412
   type: 'test'
   ...
 # Subtest: different addresses with same Message-ID never cross personal recipients or links
 ok 4 - different addresses with same Message-ID never cross personal recipients or links
   ---
-  duration_ms: 22.524182
+  duration_ms: 19.562894
   type: 'test'
   ...
-# Subtest: insert failure=true cannot reuse old row or send links
-ok 5 - insert failure=true cannot reuse old row or send links
+# Subtest: actual INSERT failure=true rejects once without pushes
+ok 5 - actual INSERT failure=true rejects once without pushes
   ---
-  duration_ms: 1.537712
+  duration_ms: 1.299492
   type: 'test'
   ...
-# Subtest: insert failure=throw cannot reuse old row or send links
-ok 6 - insert failure=throw cannot reuse old row or send links
+# Subtest: actual INSERT failure=throw rejects once without pushes
+ok 6 - actual INSERT failure=throw rejects once without pushes
   ---
-  duration_ms: 3.93028
+  duration_ms: 0.96771
   type: 'test'
   ...
-# Subtest: insert failure=missing cannot reuse old row or send links
-ok 7 - insert failure=missing cannot reuse old row or send links
+# Subtest: successful INSERT with invalid ID=zero retains mail, no reject or linked pushes
+ok 7 - successful INSERT with invalid ID=zero retains mail, no reject or linked pushes
   ---
-  duration_ms: 16.637254
+  duration_ms: 16.845807
+  type: 'test'
+  ...
+# Subtest: successful INSERT with invalid ID=fraction retains mail, no reject or linked pushes
+ok 8 - successful INSERT with invalid ID=fraction retains mail, no reject or linked pushes
+  ---
+  duration_ms: 16.141464
+  type: 'test'
+  ...
+# Subtest: successful INSERT with invalid ID=string retains mail, no reject or linked pushes
+ok 9 - successful INSERT with invalid ID=string retains mail, no reject or linked pushes
+  ---
+  duration_ms: 16.68235
+  type: 'test'
+  ...
+# Subtest: successful INSERT with invalid ID=missing retains mail, no reject or linked pushes
+ok 10 - successful INSERT with invalid ID=missing retains mail, no reject or linked pushes
+  ---
+  duration_ms: 17.134369
   type: 'test'
   ...
 # Subtest: row ID does not authorize stale personal Telegram credentials
-ok 8 - row ID does not authorize stale personal Telegram credentials
+ok 11 - row ID does not authorize stale personal Telegram credentials
   ---
-  duration_ms: 17.57162
+  duration_ms: 17.550322
   type: 'test'
   ...
-1..8
-# tests 8
+1..11
+# tests 11
 # suites 0
-# pass 8
+# pass 11
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 145.494617
+# duration_ms 212.814348

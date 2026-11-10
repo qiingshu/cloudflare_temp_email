@@ -1,0 +1,7 @@
+{
+  "mutation": "remove only telegramOwnsCurrentAddress gate in actual send function",
+  "numeric_row_id_guard_retained": true,
+  "source_security_exit_code": 1,
+  "detected": true,
+  "same_name_positive_controls": 2
+}
