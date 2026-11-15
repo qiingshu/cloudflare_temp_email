@@ -1,0 +1,11 @@
+--- baseline/index.js
++++ candidate/index.js
+@@ -36861,7 +36861,7 @@
+   if (await e34.env.KV.get(`temp-mail:${t}`)) return e34.text(i.CodeAlreadySentMsg, 400);
+   let p = Math.floor(1e5 + Math.random() * 9e5).toString();
+   try {
+-    await Cg(e34, a.verifyMailSender, { from_name: "Temp Mail Verify", to_name: "", to_mail: t, subject: "Temp Mail Verify code", content: `Your verify code is ${p}`, is_html: false });
++    await Cg(e34, a.verifyMailSender, { from_name: "Admin", to_name: "", to_mail: t, subject: "邮箱验证码 / Email verification code", content: `您的验证码：${p}，5 分钟内有效。请勿向他人泄露验证码。如非本人操作，请忽略此邮件。\nYour verification code: ${p}. Valid for 5 minutes. Do not share this code. If you did not request it, please ignore this email.\n\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc.`, is_html: false });
+   } catch (b) {
+     return e34.text(`Failed to send verify code: ${b.message}`, 500);
+   }
