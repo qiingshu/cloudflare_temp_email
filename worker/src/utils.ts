@@ -232,7 +232,7 @@ export const getEnvStringList = (value: string | string[] | undefined): string[]
 }
 
 export const sendAdminInternalMail = async (
-    c: Context<HonoCustomType>, toMail: string, subject: string, text: string
+    c: Context<HonoCustomType>, toMail: string, subject: string, text: string, html?: string
 ): Promise<boolean> => {
     try {
 
@@ -247,6 +247,9 @@ export const sendAdminInternalMail = async (
             contentType: 'text/plain',
             data: `${text}\n\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc.`
         });
+        if (html) {
+            msg.addMessage({ contentType: 'text/html', data: html });
+        }
         const message_id = Math.random().toString(36).substring(2, 15);
         const { success } = await c.env.DB.prepare(
             `INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)`
