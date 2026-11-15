@@ -239,22 +239,22 @@ export const sendAdminInternalMail = async (
         const msg = createMimeMessage();
         msg.setSender({
             name: "Admin",
-            addr: "admin@internal"
+            addr: "admin@imqing.cc"
         });
         msg.setRecipient(toMail);
         msg.setSubject(subject);
         msg.addMessage({
             contentType: 'text/plain',
-            data: text
+            data: `${text}\n\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc.`
         });
         const message_id = Math.random().toString(36).substring(2, 15);
         const { success } = await c.env.DB.prepare(
             `INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)`
         ).bind(
-            "admin@internal", toMail, msg.asRaw(), message_id
+            "admin@imqing.cc", toMail, msg.asRaw(), message_id
         ).run();
         if (!success) {
-            console.log(`Failed save message from admin@internal to ${toMail}`);
+            console.log(`Failed save message from admin@imqing.cc to ${toMail}`);
         }
         return success;
     } catch (error) {
