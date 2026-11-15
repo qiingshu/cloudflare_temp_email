@@ -1,0 +1,14 @@
+✔ source: pagination failure preserves mail, restores size/page, retry works (8.124846ms)
+✔ source: partial batch preserves failed and pending selections for retry (2.294126ms)
+✔ source: latest pagination request wins and empty refresh clears count (2.519272ms)
+✔ runtime: pagination failure preserves mail, restores size/page, retry works (2.279502ms)
+✔ runtime: partial batch preserves failed and pending selections for retry (1.608415ms)
+✔ runtime: latest pagination request wins and empty refresh clears count (1.861499ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 235.97415
