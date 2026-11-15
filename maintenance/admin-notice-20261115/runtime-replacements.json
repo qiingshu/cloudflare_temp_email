@@ -1,0 +1,22 @@
+[
+  [
+    "admin@internal",
+    "admin@imqing.cc",
+    3
+  ],
+  [
+    "\"Account Send Access Updated\"",
+    "\"发信权限已更新 / Sending permissions updated\"",
+    1
+  ],
+  [
+    "`Your send access has been ${i ? \"enabled\" : \"disabled\"}, balance: ${n}`",
+    "`您的发信权限已${i ? \"开启\" : \"关闭\"}，剩余发信额度：${n}。\\nYour sending permissions have been ${i ? \"enabled\" : \"disabled\"}. Remaining quota: ${n}.`",
+    1
+  ],
+  [
+    "i.addMessage({ contentType: \"text/plain\", data: n })",
+    "i.addMessage({ contentType: \"text/plain\", data: n + \"\\n\\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc.\" })",
+    1
+  ]
+]

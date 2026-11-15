@@ -1,0 +1,24 @@
+--- baseline/index.js
++++ candidate/index.js
+@@ -28980,9 +28980,9 @@
+ var PN = s(async (e34, t, r, n) => {
+   try {
+     let i = sd();
+-    i.setSender({ name: "Admin", addr: "admin@internal" }), i.setRecipient(t), i.setSubject(r), i.addMessage({ contentType: "text/plain", data: n });
+-    let o = Math.random().toString(36).substring(2, 15), { success: a } = await e34.env.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind("admin@internal", t, i.asRaw(), o).run();
+-    return a || console.log(`Failed save message from admin@internal to ${t}`), a;
++    i.setSender({ name: "Admin", addr: "admin@imqing.cc" }), i.setRecipient(t), i.setSubject(r), i.addMessage({ contentType: "text/plain", data: n + "\n\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc." });
++    let o = Math.random().toString(36).substring(2, 15), { success: a } = await e34.env.DB.prepare("INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)").bind("admin@imqing.cc", t, i.asRaw(), o).run();
++    return a || console.log(`Failed save message from admin@imqing.cc to ${t}`), a;
+   } catch (i) {
+     return console.log("sendAdminInternalMail error", i), false;
+   }
+@@ -43617,7 +43617,7 @@
+   if (!r) return e34.text("Invalid address_id", 400);
+   i = i ? 1 : 0;
+   let { success: o } = await e34.env.DB.prepare("UPDATE address_sender SET enabled = ?, balance = ? WHERE id = ? ").bind(i, n, r).run();
+-  return o ? (await PN(e34, t, "Account Send Access Updated", `Your send access has been ${i ? "enabled" : "disabled"}, balance: ${n}`), e34.json({ success: o })) : e34.text("Failed to update address sender", 500);
++  return o ? (await PN(e34, t, "发信权限已更新 / Sending permissions updated", `您的发信权限已${i ? "开启" : "关闭"}，剩余发信额度：${n}。\nYour sending permissions have been ${i ? "enabled" : "disabled"}. Remaining quota: ${n}.`), e34.json({ success: o })) : e34.text("Failed to update address sender", 500);
+ });
+ wt.delete("/admin/address_sender/:id", async (e34) => {
+   let { id: t } = e34.req.param(), { success: r } = await e34.env.DB.prepare("DELETE FROM address_sender WHERE id = ? ").bind(t).run();
