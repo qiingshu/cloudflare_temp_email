@@ -142,34 +142,45 @@ watch(autoRefresh, async (autoRefresh, old) => {
   setupAutoRefresh(autoRefresh)
 }, { immediate: true })
 
-watch([page, pageSize], async ([page, pageSize], [oldPage, oldPageSize]) => {
-  if (page !== oldPage || pageSize !== oldPageSize) {
-    await refresh();
-  }
+let loadedPage = { page: page.value, pageSize: pageSize.value }
+let requestedPage = null
+watch([page, pageSize], async ([page, pageSize]) => {
+  if (requestedPage?.page === page && requestedPage.pageSize === pageSize) return
+  if (loadedPage.page !== page || loadedPage.pageSize !== pageSize) await refresh()
 })
 
 const refresh = async () => {
+  const pagination = { page: page.value, pageSize: pageSize.value }
+  requestedPage = pagination
+  loading.value = true
   try {
     const { results, count: totalCount } = await props.fetchMailData(
-      pageSize.value, (page.value - 1) * pageSize.value
-    );
-    loading.value = true;
-    data.value = await Promise.all(results.map(async (item) => {
-      item.checked = false;
-      return await processItem(item);
-    }));
-    if (totalCount > 0) {
-      count.value = totalCount;
-    }
-    curMail.value = null;
-    if (!isMobile.value && data.value.length > 0) {
-      curMail.value = data.value[0];
-    }
+      pagination.pageSize, (pagination.page - 1) * pagination.pageSize
+    )
+    const mails = await Promise.all(results.map(async (item) => {
+      item.checked = false
+      return await processItem(item)
+    }))
+    if (requestedPage !== pagination) return false
+    data.value = mails
+    loadedPage = pagination
+    count.value = totalCount
+    curMail.value = !isMobile.value && data.value.length > 0 ? data.value[0] : null
+    return true
   } catch (error) {
-    message.error(error.message || "error");
-    console.error(error);
+    if (requestedPage !== pagination) return false
+    message.error(error.message || "error")
+    console.error(error)
+    if (page.value === pagination.page && pageSize.value === pagination.pageSize) {
+      page.value = loadedPage.page
+      pageSize.value = loadedPage.pageSize
+    }
+    return false
   } finally {
-    loading.value = false;
+    if (requestedPage === pagination) {
+      requestedPage = null
+      loading.value = false
+    }
   }
 };
 
@@ -269,6 +280,7 @@ const multiActionSelectAll = (checked) => {
 }
 
 const multiActionDeleteMail = async () => {
+  const deletedIds = new Set()
   try {
     loading.value = true;
     const selectedMails = data.value.filter((item) => item.checked);
@@ -282,19 +294,25 @@ const multiActionDeleteMail = async () => {
     };
     for (const [index, mail] of selectedMails.entries()) {
       await props.deleteMail(mail.id);
-      showMultiActionDelete.value = true;
+      deletedIds.add(mail.id)
       multiActionDeleteProgress.value = {
         percentage: Math.floor((index + 1) / selectedMails.length * 100),
         tip: `${index + 1}/${selectedMails.length}`
       };
     }
+    data.value = data.value.filter(mail => !deletedIds.has(mail.id))
+    count.value = Math.max(0, count.value - deletedIds.size)
+    if (deletedIds.has(curMail.value?.id)) curMail.value = null
+    showMultiActionDelete.value = true
     message.success(t("success"));
     await refresh();
   } catch (error) {
+    data.value = data.value.filter(mail => !deletedIds.has(mail.id))
+    count.value = Math.max(0, count.value - deletedIds.size)
+    if (deletedIds.has(curMail.value?.id)) curMail.value = null
     message.error(error.message || "error");
   } finally {
     loading.value = false;
-    showMultiActionDelete.value = true;
   }
 }
 
