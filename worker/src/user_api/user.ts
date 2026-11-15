@@ -1,3 +1,4 @@
+import { renderVerificationMail } from "../system-mail";
 import { Context } from 'hono';
 import { Jwt } from 'hono/utils/jwt'
 
@@ -45,8 +46,8 @@ export default {
                 to_name: '',
                 to_mail: email as string,
                 subject: "邮箱验证码 / Email verification code",
-                content: `您的验证码：${code}，5 分钟内有效。请勿向他人泄露验证码。如非本人操作，请忽略此邮件。\nYour verification code: ${code}. Valid for 5 minutes. Do not share this code. If you did not request it, please ignore this email.\n\n此邮件由系统自动生成，请勿直接回复。如需帮助，请联系 hi@imqing.cc。\nThis is an automated notification. Please do not reply. For help, contact hi@imqing.cc.`,
-                is_html: false,
+                content: renderVerificationMail(code),
+                is_html: true,
             })
         } catch (e) {
             return c.text(`Failed to send verify code: ${(e as Error).message}`, 500)

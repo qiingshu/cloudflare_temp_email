@@ -1,3 +1,4 @@
+import { renderSendAccessMail } from "../system-mail";
 import { Hono } from 'hono'
 import { mailSecurityDeleteAddress } from '../mail-security'
 import { pruneDeletedTelegramCredential } from '../telegram_api/common'
@@ -125,7 +126,8 @@ api.post('/admin/address_sender', async (c) => {
     }
     await sendAdminInternalMail(
         c, address, "发信权限已更新 / Sending permissions updated",
-        `您的发信权限已${enabled ? "开启" : "关闭"}，剩余发信额度：${balance}。\nYour sending permissions have been ${enabled ? "enabled" : "disabled"}. Remaining quota: ${balance}.`
+        `您的发信权限已${enabled ? "开启" : "关闭"}，剩余发信额度：${balance}。\nYour sending permissions have been ${enabled ? "enabled" : "disabled"}. Remaining quota: ${balance}.`,
+        renderSendAccessMail(enabled, balance)
     );
     return c.json({
         success: success
