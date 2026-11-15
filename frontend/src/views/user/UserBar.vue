@@ -18,11 +18,13 @@ const { t } = useI18n({
     messages: {
         en: {
             currentUser: 'Current Login User',
-            fetchUserSettingsError: 'Login password is invalid or account not exist, it may be network connection issue, please try again later.',
+            restoreSessionError: 'Your previous session could not be restored. Please sign in again.',
+            restoreConnectionError: 'Unable to restore your session due to a connection or service issue. Refresh later or sign in again.',
         },
         zh: {
             currentUser: '当前登录用户',
-            fetchUserSettingsError: '登录信息已过期或账号不存在，也可能是网络连接异常，请稍后再尝试。',
+            restoreSessionError: '未能恢复上次登录，请重新登录。',
+            restoreConnectionError: '暂时无法恢复登录，连接或服务可能异常。请稍后刷新重试，或重新登录。',
 
         }
     }
@@ -50,8 +52,8 @@ onMounted(async () => {
         </div>
         <div v-else class="center">
             <n-card :bordered="false" embedded style="max-width: 600px;">
-                <n-alert v-if="userJwt" type="warning" :show-icon="false" :bordered="false" closable>
-                    <span>{{ t('fetchUserSettingsError') }}</span>
+                <n-alert v-if="userJwt && userSettings.restoreError" type="warning" :show-icon="false" :bordered="false" closable>
+                    <span>{{ t(userSettings.restoreError === 'session' ? 'restoreSessionError' : 'restoreConnectionError') }}</span>
                 </n-alert>
                 <UserLogin />
             </n-card>

@@ -135,6 +135,8 @@ const getUserOpenSettings = async (message) => {
 }
 
 const getUserSettings = async (message) => {
+    const requestToken = userJwt.value;
+    userSettings.value.restoreError = "";
     try {
         if (!userJwt.value) return;
         const res = await api.fetch("/user_api/settings")
@@ -153,7 +155,10 @@ const getUserSettings = async (message) => {
             }
         }
     } catch (error) {
-        message?.error(error.message || "error");
+        if (userJwt.value !== requestToken) return;
+        const status = error.status || error.response?.status
+            || Number(String(error.message || "").match(/^(?:\[|Code )(\d{3})/)?.[1]);
+        userSettings.value.restoreError = [400, 401, 403].includes(status) ? "session" : "connection";
     } finally {
         userSettings.value.fetched = true;
     }

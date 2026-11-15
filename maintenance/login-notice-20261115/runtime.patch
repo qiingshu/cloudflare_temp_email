@@ -1,0 +1,54 @@
+--- baseline/index.js
++++ candidate/index.js
+@@ -47339,12 +47339,16 @@
+     }
+   };
+   Ej = async (e) => {
++    const requestToken = Wp.value;
++    ch.value.restoreError = "";
+     try {
+       if (!Wp.value) return;
+       const t = await lt.fetch("/user_api/settings");
+       Object.assign(ch.value, t);
+     } catch (t) {
+-      e == null ? void 0 : e.error(t.message || "error");
++      if (Wp.value !== requestToken) return;
++      const status = t.status || t.response?.status || Number(String(t.message || "").match(/^(?:\[|Code )(\d{3})/)?.[1]);
++      ch.value.restoreError = [400, 401, 403].includes(status) ? "session" : "connection";
+     } finally {
+       ch.value.fetched = true;
+     }
+@@ -57269,11 +57273,13 @@
+         messages: {
+           en: {
+             currentUser: "Current Login User",
+-            fetchUserSettingsError: "Login password is invalid or account not exist, it may be network connection issue, please try again later."
++            restoreSessionError: "Your previous session could not be restored. Please sign in again.",
++            restoreConnectionError: "Unable to restore your session due to a connection or service issue. Refresh later or sign in again."
+           },
+           zh: {
+             currentUser: "\u5F53\u524D\u767B\u5F55\u7528\u6237",
+-            fetchUserSettingsError: "\u767B\u5F55\u4FE1\u606F\u5DF2\u8FC7\u671F\u6216\u8D26\u53F7\u4E0D\u5B58\u5728\uFF0C\u4E5F\u53EF\u80FD\u662F\u7F51\u7EDC\u8FDE\u63A5\u5F02\u5E38\uFF0C\u8BF7\u7A0D\u540E\u518D\u5C1D\u8BD5\u3002"
++            restoreSessionError: "未能恢复上次登录，请重新登录。",
++            restoreConnectionError: "暂时无法恢复登录，连接或服务可能异常。请稍后刷新重试，或重新登录。"
+           }
+         }
+       });
+@@ -57307,7 +57313,7 @@
+               }
+             }, {
+               default: N(() => [
+-                U(n) ? (we(), je(u, {
++                U(n) && U(r).restoreError ? (we(), je(u, {
+                   key: 0,
+                   type: "warning",
+                   "show-icon": false,
+@@ -57315,7 +57321,7 @@
+                   closable: ""
+                 }, {
+                   default: N(() => [
+-                    Ve("span", null, Ce(U(i)("fetchUserSettingsError")), 1)
++                    Ve("span", null, Ce(U(i)(U(r).restoreError === "session" ? "restoreSessionError" : "restoreConnectionError")), 1)
+                   ]),
+                   _: 1
+                 })) : it("", true),
